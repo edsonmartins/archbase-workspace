@@ -1,0 +1,24 @@
+{
+  "name": "@archbase/notes",
+  "version": "0.1.0",
+  "description": "Notes app for Archbase Workspace",
+  "private": true,
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@rspack/core": "^1.2.0",
+    "@rspack/cli": "^1.2.0",
+    "@module-federation/enhanced": "^0.8.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

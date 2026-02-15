@@ -1,0 +1,22 @@
+{
+  "id": "dev.archbase.calculator",
+  "name": "calculator",
+  "version": "0.1.0",
+  "entrypoint": "./src/App.tsx",
+  "remoteEntry": "http://localhost:3002/mf-manifest.json",
+  "displayName": "Calculator",
+  "description": "A calculator app using Jotai for state management",
+  "icon": "🧮",
+  "window": {
+    "defaultWidth": 320,
+    "defaultHeight": 480,
+    "minWidth": 280,
+    "minHeight": 400,
+    "maxWidth": 500,
+    "maxHeight": 700,
+    "resizable": true,
+    "maximizable": true,
+    "minimizable": true,
+    "closable": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "dev.archbase.notes",
+  "name": "notes",
+  "version": "0.1.0",
+  "entrypoint": "./src/App.tsx",
+  "remoteEntry": "http://localhost:3003/mf-manifest.json",
+  "displayName": "Notes",
+  "description": "A simple notes application",
+  "icon": "📝",
+  "window": {
+    "defaultWidth": 600,
+    "defaultHeight": 450,
+    "minWidth": 400,
+    "minHeight": 300,
+    "resizable": true,
+    "maximizable": true,
+    "minimizable": true,
+    "closable": true
+  }
+}
