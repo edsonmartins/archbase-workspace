@@ -7,11 +7,20 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:coverage": "turbo run test -- --coverage",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "test:e2e": "pnpm --filter @archbase/e2e test:e2e",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^8.4.0",
+    "@storybook/react": "^8.4.0",
+    "@storybook/react-webpack5": "^8.4.0",
+    "@types/react": "^19.0.0",
+    "storybook": "^8.4.0",
     "turbo": "^2.4.0",
     "typescript": "^5.7.0"
   },

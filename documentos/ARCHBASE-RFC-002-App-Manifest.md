@@ -143,7 +143,7 @@ Estudamos 3 sistemas maduros:
   "shared": {
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "@archbase-workspace/sdk": "*"
+    "@archbase/workspace-sdk": "*"
   },
   "exposes": {
     "./App": "./src/App.tsx",
@@ -604,7 +604,7 @@ function registerContributions(app: AppManifest) {
 
 ```json
 {
-  "name": "@archbase-workspace/calculator",
+  "name": "@archbase/workspace-calculator",
   "reactOS": {
     "window": { ... },
     "permissions": [ ... ]

@@ -1,8 +1,8 @@
 # Archbase Workspace-like Library - Roadmap
 
 **Version**: 1.0  
-**Last Updated**: 2025-02-15  
-**Status**: Planning Phase
+**Last Updated**: 2026-02-16
+**Status**: Fase 6 In Progress (Phases 0-5 Complete, AI Assistant Implemented)
 
 ---
 
@@ -18,8 +18,8 @@ Criar biblioteca React para interfaces desktop-like com suporte a microfrontends
 
 - [ ] 50+ janelas simultâneas rodando a 60fps
 - [ ] 5+ apps exemplo funcionais (Calculator, Notes, File Explorer, Settings, Terminal)
-- [ ] SDK publicado no npm (`@archbase-workspace/sdk`)
-- [ ] CLI para scaffolding (`npx @archbase-workspace/create-app`)
+- [ ] SDK publicado no npm (`@archbase/workspace-sdk`)
+- [ ] CLI para scaffolding (`npx @archbase/workspace-create-app`)
 - [ ] Docs completas com tutorials
 - [ ] Storybook com todos os componentes
 - [ ] 80%+ test coverage
@@ -250,7 +250,7 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 │
 └─ TypeScript Setup (Dia 5)
    ├─ [ ] MF 2.0 auto-generate .d.ts
-   ├─ [ ] Publish @archbase-workspace/types
+   ├─ [ ] Publish @archbase/workspace-types
    ├─ [ ] Apps importam types
    └─ [ ] Test: IntelliSense funciona
 ```
@@ -357,8 +357,8 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 **Deliverables**:
 - Activation events (lazy loading)
 - Extension points (commands, menus, widgets)
-- @archbase-workspace/sdk publicado npm
-- CLI tool (@archbase-workspace/cli)
+- @archbase/workspace-sdk publicado npm
+- CLI tool (@archbase/workspace-cli)
 - 5 apps exemplo completas
 
 ### Tasks (Semana 10)
@@ -383,7 +383,7 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 
 ```
 ├─ SDK Package (Dia 1-4)
-│  ├─ [ ] @archbase-workspace/sdk estrutura
+│  ├─ [ ] @archbase/workspace-sdk estrutura
 │  ├─ [ ] API: getWindowService()
 │  ├─ [ ] API: registerCommand()
 │  ├─ [ ] API: showNotification()
@@ -393,8 +393,8 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 │  └─ [ ] Docs: API reference
 │
 └─ CLI Tool (Dia 5-8)
-   ├─ [ ] @archbase-workspace/cli package
-   ├─ [ ] npx @archbase-workspace/create-app
+   ├─ [ ] @archbase/workspace-cli package
+   ├─ [ ] npx @archbase/workspace-create-app
    ├─ [ ] Templates (basic, advanced)
    ├─ [ ] dev command (rspack serve)
    ├─ [ ] build command
@@ -426,7 +426,7 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 - ✅ 5 apps exemplo completas
 - ✅ Docs completas
 
-**Demo**: `npx @archbase-workspace/create-app my-app` → app funciona em 5min
+**Demo**: `npx @archbase/workspace-create-app my-app` → app funciona em 5min
 
 ---
 
@@ -488,17 +488,27 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 
 ---
 
-## Fase 6: Features Avançadas 🚀 (Ongoing)
+## Fase 6: Features Avançadas 🚀 (In Progress)
 
 **Objetivo**: Diferenciais de mercado
 
-**Backlog**:
+### 6.1 AI Desktop Assistant ✅ Complete
+- [x] Entende contexto de janelas abertas (contextBuilder.ts)
+- [x] Executa comandos cross-app (15 tool definitions via OpenAI function calling)
+- [x] Natural language window management (open, close, focus, tile, cascade, minimize)
+- [x] Integration com OpenAI API (packages/ai-assistant + apps/ai-assistant, port 3007)
+- [x] Chat UI com streaming, tool call badges, thinking indicator
+- [x] 47 testes (contextBuilder, toolExecutor, AIAssistantService)
 
-### AI Desktop Assistant
-- [ ] Entende contexto de janelas abertas
-- [ ] Executa comandos cross-app
-- [ ] Natural language window management
-- [ ] Integration com OpenAI API / local LLMs
+### 6.2 Theme System ✅ Complete
+- [x] Light / Dark / Auto theme modes via `workspace.theme` setting
+- [x] CSS custom properties architecture (~80 variables in global.css + themes.css)
+- [x] `useThemeApplier` hook (core) applies `data-theme` attribute to `<html>`
+- [x] `useTheme` SDK hook for remote apps (reactive OS preference listener)
+- [x] AI Chat CSS refactored to CSS variables with light theme overrides
+- [x] 15 testes (9 useThemeApplier + 6 useTheme logic)
+
+### 6.3 Backlog (Planned)
 
 ### Collaboration
 - [ ] Multiplayer cursors (Figma-like)
@@ -584,9 +594,12 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 
 **Milestones**:
 - [x] Fase 0 - Walking Skeleton
-- [ ] Fase 1 - Window Management
-- [ ] Fase 2 - Module Federation
-- [ ] ...
+- [x] Fase 1 - Window Management
+- [x] Fase 2 - Module Federation
+- [x] Fase 3 - Desktop Environment
+- [x] Fase 4 - Plugin System & SDK
+- [x] Fase 5 - Isolation & Security
+- [ ] Fase 6 - Features Avançadas (AI Assistant done, remaining items planned)
 
 **Weekly Updates**: Todo sexta-feira, post no GitHub Discussions
 

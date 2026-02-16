@@ -1,0 +1,22 @@
+{
+  "name": "@archbase/ai-assistant",
+  "version": "0.1.0",
+  "description": "AI Desktop Assistant service for Archbase Workspace",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "openai": "^4.77.0",
+    "@archbase/workspace-types": "workspace:*",
+    "@archbase/workspace-state": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.0",
+    "typescript": "^5.7.0"
+  }
+}

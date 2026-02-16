@@ -6,9 +6,12 @@ import { RemoteApp } from './RemoteApp';
 import { useDrag } from '../hooks/useDrag';
 import { useResize, type ResizeDirection } from '../hooks/useResize';
 
+export type WindowAnimationState = 'minimizing' | 'closing' | 'restoring' | null;
+
 interface WindowProps {
   windowId: string;
   onSnapPreview?: (zone: SnapZone | null) => void;
+  animationState?: WindowAnimationState;
 }
 
 const RESIZE_DIRECTIONS: ResizeDirection[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
@@ -46,7 +49,7 @@ const RESIZE_STYLES: Record<ResizeDirection, React.CSSProperties> = {
   nw: { top: 0, left: 0, width: 'var(--resize-handle-size)', height: 'var(--resize-handle-size)' },
 };
 
-export function Window({ windowId, onSnapPreview }: WindowProps) {
+export function Window({ windowId, onSnapPreview, animationState }: WindowProps) {
   const window = useWindow(windowId);
   const focusedId = useFocusedWindowId();
   const focusWindow = useWindowsStore((s) => s.focusWindow);
@@ -65,18 +68,38 @@ export function Window({ windowId, onSnapPreview }: WindowProps) {
   if (!window) return null;
 
   const isMaximized = window.state === 'maximized';
+  const isAnimatingOut = animationState === 'minimizing' || animationState === 'closing';
+  const isRestoring = animationState === 'restoring';
+
+  // Build transition/animation styles based on animation state
+  let animationStyle: React.CSSProperties = {};
+  if (isAnimatingOut) {
+    animationStyle = {
+      transition: 'opacity 0.15s ease, transform 0.15s ease',
+      opacity: 0,
+      transform: `translate3d(${window.position.x}px, ${window.position.y}px, 0) scale(${animationState === 'minimizing' ? 0.5 : 0.95})`,
+      pointerEvents: 'none',
+    };
+  } else if (isRestoring) {
+    animationStyle = {
+      animation: 'window-restore 0.15s ease',
+    };
+  }
 
   return (
     <div
       ref={windowRef}
       role="dialog"
       aria-label={window.title}
-      onPointerDown={handleWindowPointerDown}
+      className={isRestoring ? 'window-restoring' : undefined}
+      onPointerDown={isAnimatingOut ? undefined : handleWindowPointerDown}
       style={{
         position: 'absolute',
         left: 0,
         top: 0,
-        transform: `translate3d(${window.position.x}px, ${window.position.y}px, 0)`,
+        transform: isAnimatingOut
+          ? animationStyle.transform
+          : `translate3d(${window.position.x}px, ${window.position.y}px, 0)`,
         width: window.size.width,
         height: window.size.height,
         zIndex: window.zIndex,
@@ -86,7 +109,14 @@ export function Window({ windowId, onSnapPreview }: WindowProps) {
         border: `1px solid var(--window-border-color)`,
         boxShadow: isFocused ? 'var(--window-shadow-active)' : 'var(--window-shadow)',
         overflow: 'hidden',
-        transition: isMaximized ? 'transform 0.15s ease, width 0.15s ease, height 0.15s ease' : undefined,
+        transition: isAnimatingOut
+          ? 'opacity 0.15s ease, transform 0.15s ease'
+          : isMaximized
+            ? 'transform 0.15s ease, width 0.15s ease, height 0.15s ease'
+            : undefined,
+        opacity: isAnimatingOut ? 0 : undefined,
+        pointerEvents: isAnimatingOut ? 'none' : undefined,
+        ...(!isAnimatingOut && isRestoring ? { animation: 'window-restore 0.15s ease' } : {}),
       }}
     >
       <WindowHeader

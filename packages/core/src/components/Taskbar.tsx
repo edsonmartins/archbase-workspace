@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useAllWindows, useWindowsStore, useFocusedWindowId } from '@archbase/workspace-state';
-import type { AppManifest } from '@archbase/workspace-types';
+import { useAllWindows, useWindowsStore, useFocusedWindowId, useContextMenuStore } from '@archbase/workspace-state';
+import type { AppManifest, ContextMenuItem } from '@archbase/workspace-types';
 import { StatusBarWidgets } from './StatusBarWidgets';
 
 interface TaskbarProps {
@@ -15,6 +15,9 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
   const focusWindow = useWindowsStore((s) => s.focusWindow);
   const minimizeWindow = useWindowsStore((s) => s.minimizeWindow);
 
+  const closeWindow = useWindowsStore((s) => s.closeWindow);
+  const openContextMenu = useContextMenuStore((s) => s.open);
+
   const handleTaskbarItemClick = useCallback(
     (id: string, state: string) => {
       if (state === 'minimized') {
@@ -26,6 +29,37 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
       }
     },
     [focusWindow, minimizeWindow, focusedId],
+  );
+
+  const handleTaskbarItemContextMenu = useCallback(
+    (e: React.MouseEvent, windowId: string, windowState: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const items: ContextMenuItem[] = [
+        {
+          id: 'focus',
+          label: 'Focus',
+          action: () => focusWindow(windowId),
+        },
+        {
+          id: 'minimize',
+          label: windowState === 'minimized' ? 'Restore' : 'Minimize',
+          action: () => windowState === 'minimized'
+            ? focusWindow(windowId)
+            : minimizeWindow(windowId),
+        },
+        { id: 'sep', label: '', separator: true },
+        {
+          id: 'close',
+          label: 'Close',
+          action: () => closeWindow(windowId),
+        },
+      ];
+
+      openContextMenu({ x: e.clientX, y: e.clientY }, items);
+    },
+    [focusWindow, minimizeWindow, closeWindow, openContextMenu],
   );
 
   return (
@@ -73,6 +107,7 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
           key={w.id}
           className="taskbar-running-btn"
           onClick={() => handleTaskbarItemClick(w.id, w.state)}
+          onContextMenu={(e) => handleTaskbarItemContextMenu(e, w.id, w.state)}
           aria-label={`${w.title}${focusedId === w.id ? ' (active)' : ''}${w.state === 'minimized' ? ' (minimized)' : ''}`}
           aria-pressed={focusedId === w.id}
           title={w.title}

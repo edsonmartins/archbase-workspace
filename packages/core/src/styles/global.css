@@ -30,12 +30,19 @@
   --launcher-popup-border: #334155;
   --launcher-popup-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 
-  --btn-close-bg: #ef4444;
-  --btn-minimize-bg: #f59e0b;
-  --btn-maximize-bg: #22c55e;
+  --btn-close-bg: #dc2626;
+  --btn-minimize-bg: #d97706;
+  --btn-maximize-bg: #16a34a;
   --btn-size: 14px;
 
   --focus-ring: #3b82f6;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-text: #fff;
+  --btn-secondary-bg: #374151;
+  --btn-secondary-text: #d1d5db;
 
   --ctrl-btn-hover-color: #fff;
   --launcher-btn-bg: rgba(255, 255, 255, 0.1);
@@ -428,6 +435,41 @@ html, body, #root {
   }
 }
 
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.toast-exiting {
+  animation: toast-out 0.2s ease forwards;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Window Animations (minimize/restore/close)
+   ============================================================ */
+
+@keyframes window-restore {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.window-restoring {
+  animation: window-restore 0.15s ease;
+}
+
 .toast-icon {
   width: 20px;
   height: 20px;
@@ -547,6 +589,13 @@ html, body, #root {
 .context-menu-icon {
   width: 16px;
   text-align: center;
+  flex-shrink: 0;
+}
+
+.context-menu-submenu-arrow {
+  margin-left: auto;
+  color: var(--context-menu-shortcut-color);
+  font-size: 12px;
   flex-shrink: 0;
 }
 
@@ -781,4 +830,41 @@ html, body, #root {
 .permission-prompt-allow {
   background: var(--btn-primary-bg, #3b82f6);
   color: var(--btn-primary-text, #fff);
+}
+
+/* ── Skip Navigation ─────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 99999;
+}
+
+.skip-link:focus {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  background: var(--taskbar-bg);
+  color: var(--taskbar-text);
+  outline: 2px solid var(--focus-ring);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* ── Global Focus Outline ────────────────────── */
+
+*:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
 }

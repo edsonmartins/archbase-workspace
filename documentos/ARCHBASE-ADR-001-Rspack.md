@@ -87,7 +87,7 @@ module.exports = {
         react: { singleton: true, requiredVersion: '^18.3.0' },
         'react-dom': { singleton: true, requiredVersion: '^18.3.0' },
         zustand: { singleton: true, requiredVersion: '^4.5.0' },
-        '@archbase-workspace/sdk': { singleton: true }
+        '@archbase/workspace-sdk': { singleton: true }
       },
       // Types auto-gerados em .mf/
       dts: {

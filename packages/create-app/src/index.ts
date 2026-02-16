@@ -2,22 +2,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
+import { parseArgs, type ParsedCommand } from './cli';
 
 const TEMPLATE_DIR = path.join(__dirname, '..', 'templates', 'basic');
-
-function usage(): void {
-  console.log(`
-Usage: create-app <app-name> [--port <port>]
-
-Creates a new Archbase Workspace app from template.
-
-Options:
-  --port <number>  Dev server port (default: 3010)
-
-Example:
-  npx @archbase/workspace-create-app my-app --port 3006
-`);
-}
 
 function toSnakeCase(name: string): string {
   return name.replace(/-/g, '_');
@@ -80,29 +68,73 @@ function scaffold(appName: string, port: number): void {
   console.log('');
 }
 
-// Parse CLI args
-const args = process.argv.slice(2);
-
-if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-  usage();
-  process.exit(0);
+function runDev(port: number): void {
+  console.log(`Starting dev server on port ${port}...`);
+  execSync(`npx rspack serve --port ${port}`, { stdio: 'inherit' });
 }
 
-const appName = args[0];
-let port = 3010;
-
-const portIndex = args.indexOf('--port');
-if (portIndex !== -1 && args[portIndex + 1]) {
-  port = parseInt(args[portIndex + 1], 10);
-  if (isNaN(port)) {
-    console.error('Error: --port must be a number');
-    process.exit(1);
-  }
+function runBuild(): void {
+  console.log('Building app...');
+  execSync('npx rspack build', { stdio: 'inherit' });
 }
 
-if (!/^[a-z][a-z0-9-]*$/.test(appName)) {
-  console.error('Error: app name must be lowercase alphanumeric with hyphens (e.g. my-app)');
-  process.exit(1);
+function runPublish(): void {
+  console.log('');
+  console.log('Publish is not yet available.');
+  console.log('A registry service for Archbase Workspace apps is planned for a future release.');
+  console.log('For now, deploy your built assets to any static hosting provider.');
+  console.log('');
 }
 
-scaffold(appName, port);
+function printUsage(): void {
+  console.log(`
+Usage: create-app <command> [options]
+
+Commands:
+  create <app-name>   Create a new Archbase Workspace app from template
+  dev                 Start the dev server (rspack serve)
+  build               Build the app for production (rspack build)
+  publish             Publish to registry (coming soon)
+
+Options:
+  --port <number>     Dev server port (default: 3010 for create, 3000 for dev)
+  --help, -h          Show this help message
+
+Examples:
+  npx @archbase/workspace-create-app my-app --port 3006
+  npx @archbase/workspace-create-app create my-app --port 3006
+  npx @archbase/workspace-create-app dev --port 3001
+  npx @archbase/workspace-create-app build
+`);
+}
+
+// Main
+const parsed: ParsedCommand = parseArgs(process.argv.slice(2));
+
+switch (parsed.command) {
+  case 'help':
+    printUsage();
+    process.exit(0);
+    break;
+  case 'create':
+    if (!parsed.appName) {
+      console.error('Error: app name is required for create command');
+      printUsage();
+      process.exit(1);
+    }
+    if (!/^[a-z][a-z0-9-]*$/.test(parsed.appName)) {
+      console.error('Error: app name must be lowercase alphanumeric with hyphens (e.g. my-app)');
+      process.exit(1);
+    }
+    scaffold(parsed.appName, parsed.port);
+    break;
+  case 'dev':
+    runDev(parsed.port);
+    break;
+  case 'build':
+    runBuild();
+    break;
+  case 'publish':
+    runPublish();
+    break;
+}

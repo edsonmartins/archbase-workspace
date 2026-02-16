@@ -4,6 +4,10 @@ A React library for building multi-app workspaces with professional window manag
 
 > **Archbase Workspace is NOT an operating system.** It is a **workspace organizer**: think VSCode with extensions, Adobe Creative Cloud, or Salesforce — multiple apps, one professional interface.
 
+<p align="center">
+  <img src="images/infografico_main.png" alt="Archbase Workspace — One Workspace, Every App, Any Framework" width="800" />
+</p>
+
 ---
 
 ## Why Archbase Workspace?
@@ -46,7 +50,8 @@ ARCHBASE ECOSYSTEM
 | State (per-app) | Jotai |
 | Types | TypeScript 5.7+ strict mode |
 | Validation | Zod v4 (manifest schemas) |
-| Tests | Vitest (248 tests passing) |
+| Tests | Vitest (605+ tests passing) |
+| E2E | Playwright |
 | Styling | CSS Variables (theming via custom properties) |
 
 ---
@@ -58,11 +63,20 @@ archbase-workspace/
 ├── packages/
 │   ├── core/           # Desktop shell — components, hooks, styles (Host MF, port 3000)
 │   ├── types/          # Shared TypeScript interfaces and Zod schemas
-│   └── state/          # Zustand stores (windows, registry, shortcuts, notifications, contextMenu)
+│   ├── state/          # Zustand stores (windows, registry, shortcuts, notifications, contextMenu, permissions, settings, commands)
+│   ├── sdk/            # Workspace SDK for remote apps (hooks, bridges, context menus)
+│   ├── create-app/     # CLI scaffolding tool (create, dev, build, publish)
+│   └── ai-assistant/   # AI service library (OpenAI integration, tool calling)
 ├── apps/
 │   ├── hello-world/    # Example remote app (port 3001)
 │   ├── calculator/     # Calculator with Jotai state (port 3002)
-│   └── notes/          # Notes app (port 3003)
+│   ├── notes/          # Notes app (port 3003)
+│   ├── file-explorer/  # Virtual filesystem browser (port 3004)
+│   ├── settings/       # Workspace settings manager (port 3005)
+│   ├── terminal/       # In-browser terminal emulator (port 3006)
+│   └── ai-assistant/   # AI chat assistant with OpenAI (port 3007)
+├── e2e/                # Playwright end-to-end tests
+├── .storybook/         # Storybook configuration
 ├── documentos/         # ADRs, RFCs, concept docs, roadmap
 └── CLAUDE.md           # Project instructions for AI-assisted development
 ```
@@ -73,12 +87,21 @@ archbase-workspace/
 Window types (`WorkspaceWindow`, `WindowState`), app manifest types (`AppManifest`), Zod validation schemas, keyboard shortcut types, notification types, context menu types, snap zone types.
 
 **`@archbase/workspace-state`** — Zustand stores
-`useWindowsStore` (window lifecycle, z-index, focus, bounds, tiling), `useRegistryStore` (app manifest registry with Zod validation), `useShortcutsStore` (keyboard shortcut registry with conflict detection), `useNotificationsStore` (toast notifications), `useContextMenuStore` (right-click context menus).
+`useWindowsStore` (window lifecycle, z-index, focus, bounds, tiling), `useAppRegistryStore` (app manifest registry with Zod validation), `useShortcutsStore` (keyboard shortcut registry with conflict detection), `useNotificationsStore` (toast notifications), `useContextMenuStore` (right-click context menus), `usePermissionsStore` (app permissions), `useSettingsStore` (workspace settings), `useCommandRegistryStore` (command palette).
 
 **`@archbase/workspace-core`** — Desktop shell
-Components: `Desktop`, `Window`, `WindowHeader`, `Taskbar`, `AppLauncher`, `SnapPreview`, `ToastContainer`, `RemoteApp`.
+Components: `Desktop`, `Window`, `WindowHeader`, `Taskbar`, `AppLauncher`, `SnapPreview`, `ToastContainer`, `RemoteApp`, `CommandPalette`, `PermissionPrompt`.
 Hooks: `useDrag` (pointer-based drag with snap zones), `useResize` (8-direction resize), `useGlobalKeyboardListener`.
 Utilities: `parseKeyCombo`, `computeSnapZones`.
+
+**`@archbase/workspace-sdk`** — App SDK
+`createWorkspaceSDK()` (full SDK for host apps), `createSecureSDK()` (sandboxed SDK with permissions). Hooks: `useWorkspace()`, `useWindowContext()`, `useCommand()`, `useSettingValue()`, `useStorage()`. Bridges: `createHostBridge()`, `createIframeBridgeSDK()`.
+
+**`@archbase/workspace-create-app`** — CLI tool
+`create-app <name>` (scaffold new remote app), `create-app dev` (start dev server), `create-app build` (production build), `create-app publish` (publish to registry).
+
+**`@archbase/ai-assistant`** — AI service library
+`AIAssistantService` (OpenAI integration with function calling), 15 workspace tools (open/close/focus/tile windows, execute commands, notifications, settings), `buildSystemPrompt()` (context builder), `executeTool()` / `executeToolCalls()` (tool executor).
 
 ---
 
@@ -106,6 +129,12 @@ Utilities: `parseKeyCombo`, `computeSnapZones`.
 - **Context Menus** — Right-click menus with full keyboard navigation (WAI-ARIA compliant)
 - **Toast Notifications** — Info, success, warning, error toasts with auto-dismiss
 - **Taskbar** — Running apps, launcher button, active window indicator
+
+### Theming
+- **Dark / Light / Auto** modes via `workspace.theme` setting
+- ~80 CSS custom properties for all UI colors
+- Auto mode follows OS preference (`prefers-color-scheme`) in real-time
+- SDK `useTheme()` hook for remote apps to read resolved theme
 
 ### Accessibility
 - ARIA roles on all interactive elements (`dialog`, `separator`, `menu`, `combobox`)
@@ -136,6 +165,10 @@ This starts:
 - Hello World app on `http://localhost:3001`
 - Calculator app on `http://localhost:3002`
 - Notes app on `http://localhost:3003`
+- File Explorer app on `http://localhost:3004`
+- Settings app on `http://localhost:3005`
+- Terminal app on `http://localhost:3006`
+- AI Assistant app on `http://localhost:3007`
 
 ### Other Commands
 
@@ -143,11 +176,20 @@ This starts:
 # Build all packages
 pnpm build
 
-# Run all tests (248 tests)
+# Run all tests (605+ tests)
 pnpm test
+
+# Run tests with coverage report
+pnpm test:coverage
 
 # TypeScript type checking
 pnpm typecheck
+
+# Run E2E tests (requires dev servers running)
+pnpm test:e2e
+
+# Launch Storybook component explorer
+pnpm storybook
 
 # Clean all build artifacts
 pnpm clean
@@ -160,8 +202,10 @@ pnpm clean
 | Shortcut | Action |
 |----------|--------|
 | `Cmd+K` / `Ctrl+K` | Open/close App Launcher |
+| `Cmd+Shift+P` / `Ctrl+Shift+P` | Open Command Palette |
 | `Cmd+W` / `Ctrl+W` | Close focused window |
 | `Cmd+M` / `Ctrl+M` | Minimize all windows |
+| `Cmd+,` / `Ctrl+,` | Open Settings |
 | `` Cmd+` `` / `` Ctrl+` `` | Focus next window |
 | `` Cmd+Shift+` `` / `` Ctrl+Shift+` `` | Focus previous window |
 | `Cmd+Shift+H` / `Ctrl+Shift+H` | Tile windows horizontally |
@@ -171,6 +215,10 @@ pnpm clean
 ---
 
 ## Architecture Decisions
+
+<p align="center">
+  <img src="images/infografico_secondary.png" alt="Archbase Workspace — Technical Enterprise Infographic" width="700" />
+</p>
 
 | ADR | Title | Status |
 |-----|-------|--------|
@@ -191,8 +239,9 @@ See `documentos/ARCHBASE-ADR-*.md` for full decision records.
 | Phase 1 | Window Management — drag, resize, focus, min/max | Complete |
 | Phase 2 | Module Federation — registry, dynamic loading, error boundaries | Complete |
 | Phase 3 | Desktop Environment — launcher, snap, shortcuts, context menus, toasts | Complete |
-| Phase 4 | Plugin System & SDK — activation events, CLI, SDK package | Planned |
-| Phase 5 | Isolation & Security — Shadow DOM, permissions, sandboxed iframe | Planned |
+| Phase 4 | Plugin System & SDK — activation events, CLI, SDK package | Complete |
+| Phase 5 | Isolation & Security — Shadow DOM, permissions, sandboxed iframe | Complete |
+| Phase 6 | Advanced Features — AI assistant, themes, i18n, plugins marketplace | In Progress |
 
 See `documentos/ARCHBASE-WORKSPACE-ROADMAP.md` for the full roadmap.
 

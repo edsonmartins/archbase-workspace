@@ -41,7 +41,7 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
   useEffect(() => {
     if (!resultsRef.current) return;
     const items = resultsRef.current.querySelectorAll('.command-palette-item');
-    items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+    items[selectedIndex]?.scrollIntoView?.({ block: 'nearest' });
   }, [selectedIndex]);
 
   const executeCommand = useCallback(
@@ -91,8 +91,17 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
 
   if (!visible) return null;
 
+  const activeDescendant =
+    filtered.length > 0 ? `cmd-${filtered[selectedIndex]?.id}` : undefined;
+
   return (
-    <div className="command-palette-overlay" onClick={handleOverlayClick}>
+    <div
+      className="command-palette-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command Palette"
+      onClick={handleOverlayClick}
+    >
       <div className="command-palette-card" onKeyDown={handleKeyDown}>
         <input
           ref={inputRef}
@@ -100,19 +109,33 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
           type="text"
           placeholder="Type a command..."
           value={query}
+          role="combobox"
+          aria-expanded={filtered.length > 0}
+          aria-controls="command-palette-listbox"
+          aria-activedescendant={activeDescendant}
+          aria-autocomplete="list"
           onChange={(e) => {
             setQuery(e.target.value);
             setSelectedIndex(0);
           }}
         />
-        <div ref={resultsRef} className="command-palette-results">
+        <div
+          ref={resultsRef}
+          id="command-palette-listbox"
+          role="listbox"
+          aria-label="Commands"
+          className="command-palette-results"
+        >
           {filtered.length === 0 ? (
             <div className="command-palette-no-results">No commands found</div>
           ) : (
             filtered.map((cmd, i) => (
               <button
                 key={cmd.id}
+                id={`cmd-${cmd.id}`}
                 className="command-palette-item"
+                role="option"
+                aria-selected={i === selectedIndex}
                 data-selected={i === selectedIndex}
                 onClick={() => executeCommand(cmd)}
                 onMouseEnter={() => setSelectedIndex(i)}

@@ -1,0 +1,89 @@
+/*
+ * Theme overrides for the Archbase Workspace.
+ * The dark theme is defined as the default in :root (global.css).
+ * This file provides the light theme variant.
+ */
+
+[data-theme="light"] {
+  /* Window */
+  --window-border-color: #e5e7eb;
+  --window-header-bg: #f9fafb;
+  --window-header-bg-active: #f3f4f6;
+  --window-body-bg: #ffffff;
+  --window-title-color: #9ca3af;
+  --window-title-color-active: #111827;
+  --window-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --window-shadow-active: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Desktop */
+  --desktop-bg: #e2e8f0;
+
+  /* Taskbar */
+  --taskbar-bg: #ffffff;
+  --taskbar-border: #e5e7eb;
+  --taskbar-item-bg-active: rgba(0, 0, 0, 0.06);
+  --taskbar-item-bg-hover: rgba(0, 0, 0, 0.04);
+  --taskbar-text: #334155;
+  --taskbar-active-indicator: #3b82f6;
+
+  /* Launcher */
+  --launcher-popup-bg: #ffffff;
+  --launcher-popup-border: #e5e7eb;
+  --launcher-popup-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --launcher-overlay-bg: rgba(0, 0, 0, 0.3);
+  --launcher-card-bg: #ffffff;
+  --launcher-card-border: #e5e7eb;
+  --launcher-input-bg: #f9fafb;
+  --launcher-input-border: #d1d5db;
+  --launcher-input-color: #1f2937;
+  --launcher-result-bg-hover: rgba(0, 0, 0, 0.04);
+  --launcher-result-bg-selected: rgba(59, 130, 246, 0.12);
+  --launcher-placeholder-color: #9ca3af;
+  --launcher-no-results-color: #9ca3af;
+
+  /* Window control buttons (traffic lights — same colors work on light bg) */
+  --btn-close-bg: #dc2626;
+  --btn-minimize-bg: #d97706;
+  --btn-maximize-bg: #16a34a;
+
+  /* Buttons */
+  --ctrl-btn-hover-color: #fff;
+  --launcher-btn-bg: rgba(0, 0, 0, 0.06);
+  --launcher-btn-bg-hover: rgba(0, 0, 0, 0.1);
+  --app-btn-color: #334155;
+  --app-btn-bg-hover: rgba(0, 0, 0, 0.06);
+
+  /* Remote app states */
+  --remote-loading-color: #9ca3af;
+  --remote-error-color: #dc2626;
+  --remote-error-bg-hover: rgba(220, 38, 38, 0.08);
+
+  /* Toast */
+  --toast-bg: #ffffff;
+  --toast-border: #e5e7eb;
+  --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --toast-color: #1f2937;
+  --toast-message-color: #6b7280;
+
+  /* Context Menu */
+  --context-menu-bg: #ffffff;
+  --context-menu-border: #e5e7eb;
+  --context-menu-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --context-menu-color: #1f2937;
+  --context-menu-item-hover: rgba(0, 0, 0, 0.05);
+  --context-menu-separator: #e5e7eb;
+  --context-menu-shortcut-color: #9ca3af;
+  --context-menu-disabled-color: #d1d5db;
+
+  /* Snap Preview */
+  --snap-preview-bg: rgba(59, 130, 246, 0.1);
+  --snap-preview-border: rgba(59, 130, 246, 0.3);
+
+  /* Permission Prompt / General */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-text: #fff;
+  --btn-secondary-bg: #e5e7eb;
+  --btn-secondary-text: #374151;
+}

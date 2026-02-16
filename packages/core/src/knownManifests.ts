@@ -14,6 +14,8 @@ const MF_CALCULATOR_URL = process.env.MF_CALCULATOR_URL || 'http://localhost:300
 const MF_NOTES_URL = process.env.MF_NOTES_URL || 'http://localhost:3003';
 const MF_FILE_EXPLORER_URL = process.env.MF_FILE_EXPLORER_URL || 'http://localhost:3004';
 const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
+const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
+const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 
 export const KNOWN_MANIFESTS: AppManifest[] = [
   {
@@ -199,6 +201,95 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
           category: 'Workspace',
           icon: '⚙️',
           keybinding: 'Cmd+,',
+        },
+      ],
+      settings: [
+        {
+          key: 'workspace.theme',
+          type: 'string',
+          default: 'dark',
+          description: 'Workspace color theme (dark, light, auto)',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.terminal',
+    name: 'terminal',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_TERMINAL_URL}/mf-manifest.json`,
+    displayName: 'Terminal',
+    description: 'An in-browser terminal emulator',
+    icon: '💻',
+    window: {
+      defaultWidth: 700,
+      defaultHeight: 450,
+      minWidth: 400,
+      minHeight: 250,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: [],
+    activationEvents: ['onCommand:terminal.open'],
+    contributes: {
+      commands: [
+        {
+          id: 'terminal.open',
+          title: 'Open Terminal',
+          category: 'Terminal',
+          icon: '💻',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.ai-assistant',
+    name: 'ai_assistant',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_AI_ASSISTANT_URL}/mf-manifest.json`,
+    displayName: 'AI Assistant',
+    description: 'AI Desktop Assistant with OpenAI integration',
+    icon: '🤖',
+    window: {
+      defaultWidth: 420,
+      defaultHeight: 600,
+      minWidth: 350,
+      minHeight: 400,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: ['notifications'],
+    activationEvents: ['onCommand:ai-assistant.open'],
+    contributes: {
+      commands: [
+        {
+          id: 'ai-assistant.open',
+          title: 'Open AI Assistant',
+          category: 'AI',
+          icon: '🤖',
+          keybinding: 'Cmd+Shift+A',
+        },
+      ],
+      settings: [
+        {
+          key: 'ai-assistant.apiKey',
+          type: 'string',
+          default: '',
+          description: 'OpenAI API key for the AI assistant',
+        },
+        {
+          key: 'ai-assistant.model',
+          type: 'string',
+          default: 'gpt-4o',
+          description: 'OpenAI model to use',
         },
       ],
     },

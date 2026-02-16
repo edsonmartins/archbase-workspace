@@ -7,6 +7,8 @@ const MF_CALCULATOR_URL = process.env.MF_CALCULATOR_URL || 'http://localhost:300
 const MF_NOTES_URL = process.env.MF_NOTES_URL || 'http://localhost:3003';
 const MF_FILE_EXPLORER_URL = process.env.MF_FILE_EXPLORER_URL || 'http://localhost:3004';
 const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
+const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
+const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 
 export default defineConfig({
   entry: './src/index.tsx',
@@ -58,6 +60,8 @@ export default defineConfig({
         notes: `notes@${MF_NOTES_URL}/mf-manifest.json`,
         file_explorer: `file_explorer@${MF_FILE_EXPLORER_URL}/mf-manifest.json`,
         settings: `settings@${MF_SETTINGS_URL}/mf-manifest.json`,
+        terminal: `terminal@${MF_TERMINAL_URL}/mf-manifest.json`,
+        ai_assistant: `ai_assistant@${MF_AI_ASSISTANT_URL}/mf-manifest.json`,
       },
       shared: {
         react: { singleton: true, requiredVersion: '^19.0.0' },
@@ -65,6 +69,7 @@ export default defineConfig({
         zustand: { singleton: true, requiredVersion: '^5.0.0' },
         '@archbase/workspace-state': { singleton: true },
         '@archbase/workspace-sdk': { singleton: true },
+        '@archbase/ai-assistant': { singleton: true },
       },
     }),
   ],

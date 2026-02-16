@@ -1,8 +1,9 @@
 # Archbase Workspace
 
-> **Status**: 🚧 Planning Phase  
-> **Version**: 0.1.0-alpha  
-> **Last Updated**: 2025-02-15
+> **Status**: 🚀 Phase 6 In Progress (Phases 0-5 Complete)
+> **Version**: 1.0.0-beta
+> **Last Updated**: 2026-02-16
+> **Note**: This is the original concept document. See the root [README.md](../README.md) for the current project documentation.
 
 Uma biblioteca React para criar workspaces multi-app com window management profissional e suporte a microfrontends federados. Organize múltiplos sistemas (React, Angular, Vue, Svelte, Web Components) em um ambiente unificado.
 
@@ -98,7 +99,7 @@ Fase 5: Isolamento & Segurança [2 semanas]  ░░░░░░░░░░░�
 
 ```bash
 # Criar nova app
-npx @archbase-workspace/create-app my-calculator
+npx @archbase/workspace-create-app my-calculator
 
 # Desenvolver
 cd my-calculator
@@ -147,11 +148,11 @@ App A | App B | App C | App N (federated remotes)
 archbase-workspace/
 ├── packages/
 │   ├── core/          # Desktop shell, window manager
-│   ├── sdk/           # Plugin SDK (@archbase-workspace/sdk)
+│   ├── sdk/           # Plugin SDK (@archbase/workspace-sdk)
 │   ├── types/         # Shared TypeScript types
 │   ├── ui/            # Component library
 │   ├── state/         # State utilities (Zustand stores)
-│   └── cli/           # CLI tool (@archbase-workspace/cli)
+│   └── cli/           # CLI tool (@archbase/workspace-cli)
 ├── apps/
 │   ├── desktop/       # Host application
 │   └── example-apps/  # Calculator, Notes, Terminal, etc

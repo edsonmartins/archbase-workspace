@@ -255,4 +255,177 @@ describe('createIframeBridgeSDK', () => {
       sdk.destroy();
     });
   });
+
+  it('windows.close fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.windows.close('win-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'windows.close',
+        args: ['win-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('windows.minimize fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.windows.minimize('win-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'windows.minimize',
+        args: ['win-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('windows.maximize fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.windows.maximize('win-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'windows.maximize',
+        args: ['win-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('windows.restore fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.windows.restore('win-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'windows.restore',
+        args: ['win-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('windows.setTitle fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.windows.setTitle('New Title', 'win-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'windows.setTitle',
+        args: ['New Title', 'win-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('windows.getAll returns a promise', async () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    const promise = sdk.windows.getAll();
+    respondToLastRequest([{ id: 'win-1', title: 'Test', state: 'normal' }]);
+    const result = await promise;
+    expect(result).toEqual([{ id: 'win-1', title: 'Test', state: 'normal' }]);
+    sdk.destroy();
+  });
+
+  it('notifications.success fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    const id = sdk.notifications.success('Done', 'All good');
+    expect(id).toBe('');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'notifications.success' }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('notifications.warning fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    const id = sdk.notifications.warning('Caution');
+    expect(id).toBe('');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'notifications.warning' }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('notifications.error fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    const id = sdk.notifications.error('Failed');
+    expect(id).toBe('');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'notifications.error' }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('notifications.dismiss fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.notifications.dismiss('notif-1');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'notifications.dismiss',
+        args: ['notif-1'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('settings.set fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.settings.set('theme', 'dark');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'settings.set',
+        args: ['theme', 'dark'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('settings.onChange returns a no-op unsubscribe', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    const unsub = sdk.settings.onChange('theme', () => {});
+    expect(typeof unsub).toBe('function');
+    unsub(); // should not throw
+    sdk.destroy();
+  });
+
+  it('storage.remove fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.storage.remove('key');
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'storage.remove',
+        args: ['key'],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('storage.clear fires and forgets', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    sdk.storage.clear();
+    expect(mockParentPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'storage.clear',
+        args: [],
+      }),
+      '*',
+    );
+    sdk.destroy();
+  });
+
+  it('permissions.list returns empty array (sync limitation)', () => {
+    const sdk = createIframeBridgeSDK('my-app', 'win-1');
+    expect(sdk.permissions.list()).toEqual([]);
+    sdk.destroy();
+  });
 });

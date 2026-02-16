@@ -481,7 +481,7 @@ windowService.open({ ... });
 - [ ] Keyboard shortcuts
 
 ### Fase 4: SDK Integration
-- [ ] Publicar como `@archbase-workspace/window-service`
+- [ ] Publicar como `@archbase/workspace-window-service`
 - [ ] Docs + examples
 - [ ] Migration guide
 

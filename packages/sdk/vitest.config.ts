@@ -11,5 +11,13 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'jsdom',
+    coverage: {
+      provider: 'v8',
+      enabled: false,
+      reporter: ['text', 'text-summary', 'lcov'],
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: ['src/**/__tests__/**', 'src/**/index.ts'],
+      thresholds: { lines: 80, functions: 80, branches: 70, statements: 80 },
+    },
   },
 });

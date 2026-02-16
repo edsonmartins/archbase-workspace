@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowsStore, useAllWindows, useAllApps, useRegistryStatus, useContextMenuStore } from '@archbase/workspace-state';
 import type { AppManifest, SnapZone, ContextMenuItem } from '@archbase/workspace-types';
 import { useRegistryInit } from '../hooks/useRegistryInit';
+import { useThemeApplier } from '../hooks/useThemeApplier';
 import { useGlobalKeyboardListener } from '../hooks/useGlobalKeyboardListener';
 import { LAYOUT } from '../constants';
-import { Window } from './Window';
+import { Window, type WindowAnimationState } from './Window';
 import { Taskbar } from './Taskbar';
 import { AppLauncher } from './AppLauncher';
 import { SnapPreview } from './SnapPreview';
@@ -14,6 +15,7 @@ import { PermissionPrompt } from './PermissionPrompt';
 
 export function Desktop() {
   useRegistryInit();
+  useThemeApplier();
 
   const registryStatus = useRegistryStatus();
   const apps = useAllApps();
@@ -27,6 +29,47 @@ export function Desktop() {
 
   const openContextMenu = useContextMenuStore((s) => s.open);
   const closeContextMenu = useContextMenuStore((s) => s.close);
+
+  // Track window animation states for minimize/close/restore transitions
+  const [animatingWindows, setAnimatingWindows] = useState<Map<string, WindowAnimationState>>(new Map());
+  const prevWindowsRef = useRef<Map<string, string>>(new Map()); // id → state
+
+  useEffect(() => {
+    const currentMap = new Map<string, string>();
+    for (const w of windows) {
+      currentMap.set(w.id, w.state);
+    }
+
+    const prev = prevWindowsRef.current;
+
+    for (const w of windows) {
+      const prevState = prev.get(w.id);
+      // Window was just minimized
+      if (prevState && prevState !== 'minimized' && w.state === 'minimized') {
+        setAnimatingWindows((m) => new Map(m).set(w.id, 'minimizing'));
+        setTimeout(() => {
+          setAnimatingWindows((m) => {
+            const next = new Map(m);
+            next.delete(w.id);
+            return next;
+          });
+        }, 150);
+      }
+      // Window was just restored from minimized
+      if (prevState === 'minimized' && w.state !== 'minimized') {
+        setAnimatingWindows((m) => new Map(m).set(w.id, 'restoring'));
+        setTimeout(() => {
+          setAnimatingWindows((m) => {
+            const next = new Map(m);
+            next.delete(w.id);
+            return next;
+          });
+        }, 150);
+      }
+    }
+
+    prevWindowsRef.current = currentMap;
+  }, [windows]);
 
   // Toggle launcher callback for keyboard shortcut
   const toggleLauncher = useCallback(() => {
@@ -150,7 +193,9 @@ export function Desktop() {
       }}
       onContextMenu={handleDesktopContextMenu}
     >
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <div
+        id="main-content"
         style={{
           width: '100%',
           height: `calc(100% - var(--taskbar-height))`,
@@ -158,9 +203,14 @@ export function Desktop() {
         }}
       >
         {windows
-          .filter((w) => w.state !== 'minimized')
+          .filter((w) => w.state !== 'minimized' || animatingWindows.has(w.id))
           .map((w) => (
-            <Window key={w.id} windowId={w.id} onSnapPreview={handleSnapPreview} />
+            <Window
+              key={w.id}
+              windowId={w.id}
+              onSnapPreview={handleSnapPreview}
+              animationState={animatingWindows.get(w.id) ?? null}
+            />
           ))}
         <SnapPreview zone={snapZone} />
         <ContextMenuOverlay />
@@ -179,110 +229,174 @@ export function Desktop() {
   );
 }
 
-function ContextMenuOverlay() {
-  const visible = useContextMenuStore((s) => s.visible);
-  const position = useContextMenuStore((s) => s.position);
-  const items = useContextMenuStore((s) => s.items);
-  const close = useContextMenuStore((s) => s.close);
+/** Clamp a menu position to stay within viewport bounds */
+function clampMenuPosition(
+  x: number,
+  y: number,
+  menuEl: HTMLElement,
+): { x: number; y: number } {
+  const rect = menuEl.getBoundingClientRect();
+  const vw = globalThis.innerWidth;
+  const vh = globalThis.innerHeight;
+  return {
+    x: x + rect.width > vw ? Math.max(0, vw - rect.width) : x,
+    y: y + rect.height > vh ? Math.max(0, vh - rect.height) : y,
+  };
+}
 
+interface MenuPanelProps {
+  items: ContextMenuItem[];
+  position: { x: number; y: number };
+  onClose: () => void;
+  depth?: number;
+  autoFocus?: boolean;
+}
+
+function MenuPanel({ items, position, onClose, depth = 0, autoFocus = true }: MenuPanelProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [adjustedPos, setAdjustedPos] = useState(position);
+  const [openSubmenuId, setOpenSubmenuId] = useState<string | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Actionable (non-separator, non-disabled) items for keyboard nav
   const actionableIndices = items
     .map((item, i) => (!item.separator && !item.disabled ? i : -1))
     .filter((i) => i !== -1);
 
-  // Clamp position to viewport and focus first item on open
+  // Clamp to viewport and auto-focus
   useEffect(() => {
-    if (!visible) return;
+    setFocusedIndex(autoFocus && actionableIndices.length > 0 ? actionableIndices[0] : -1);
+    setOpenSubmenuId(null);
 
-    setFocusedIndex(actionableIndices.length > 0 ? actionableIndices[0] : -1);
-
-    // Defer to next frame so the menu is rendered and measurable
     requestAnimationFrame(() => {
       const menu = menuRef.current;
       if (!menu) return;
-
-      const rect = menu.getBoundingClientRect();
-      const vw = globalThis.innerWidth;
-      const vh = globalThis.innerHeight;
-
-      const x = position.x + rect.width > vw ? Math.max(0, vw - rect.width) : position.x;
-      const y = position.y + rect.height > vh ? Math.max(0, vh - rect.height) : position.y;
-      setAdjustedPos({ x, y });
-
-      // Focus the menu container for keyboard events
-      menu.focus();
+      setAdjustedPos(clampMenuPosition(position.x, position.y, menu));
+      if (autoFocus) menu.focus();
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  }, [position.x, position.y]);
 
-  // Focus the active menu item when focusedIndex changes
+  // Focus active item
   useEffect(() => {
-    if (!visible || focusedIndex < 0) return;
+    if (focusedIndex < 0) return;
     const menu = menuRef.current;
     if (!menu) return;
-    const buttons = menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)');
+    const buttons = menu.querySelectorAll<HTMLButtonElement>(':scope > [role="menuitem"]:not(:disabled)');
     const targetIdx = actionableIndices.indexOf(focusedIndex);
     if (targetIdx >= 0 && buttons[targetIdx]) {
       buttons[targetIdx].focus();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusedIndex, visible]);
+  }, [focusedIndex]);
+
+  const clearHoverTimer = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearHoverTimer, [clearHoverTimer]);
+
+  const handleItemMouseEnter = useCallback((item: ContextMenuItem, index: number) => {
+    clearHoverTimer();
+    setFocusedIndex(index);
+    if (item.children && item.children.length > 0) {
+      hoverTimerRef.current = setTimeout(() => setOpenSubmenuId(item.id), 150);
+    } else {
+      setOpenSubmenuId(null);
+    }
+  }, [clearHoverTimer]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (actionableIndices.length === 0) return;
-
       const currentPos = actionableIndices.indexOf(focusedIndex);
 
       switch (e.key) {
         case 'ArrowDown': {
           e.preventDefault();
+          e.stopPropagation();
           const next = currentPos < actionableIndices.length - 1 ? currentPos + 1 : 0;
           setFocusedIndex(actionableIndices[next]);
           break;
         }
         case 'ArrowUp': {
           e.preventDefault();
+          e.stopPropagation();
           const prev = currentPos > 0 ? currentPos - 1 : actionableIndices.length - 1;
           setFocusedIndex(actionableIndices[prev]);
           break;
         }
+        case 'ArrowRight': {
+          const item = items[focusedIndex];
+          if (item?.children && item.children.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpenSubmenuId(item.id);
+          }
+          break;
+        }
+        case 'ArrowLeft': {
+          if (depth > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
+          break;
+        }
         case 'Home':
           e.preventDefault();
+          e.stopPropagation();
           setFocusedIndex(actionableIndices[0]);
           break;
         case 'End':
           e.preventDefault();
+          e.stopPropagation();
           setFocusedIndex(actionableIndices[actionableIndices.length - 1]);
           break;
         case 'Enter':
         case ' ': {
           e.preventDefault();
+          e.stopPropagation();
           const item = items[focusedIndex];
-          if (item && !item.disabled && !item.separator) {
+          if (item?.children && item.children.length > 0) {
+            setOpenSubmenuId(item.id);
+          } else if (item && !item.disabled && !item.separator) {
             item.action?.();
-            close();
+            onClose();
           }
           break;
         }
         case 'Escape':
           e.preventDefault();
-          close();
+          e.stopPropagation();
+          onClose();
           break;
         case 'Tab':
-          // Trap focus inside menu
           e.preventDefault();
           break;
       }
     },
-    [actionableIndices, focusedIndex, items, close],
+    [actionableIndices, focusedIndex, items, onClose, depth],
   );
 
-  if (!visible) return null;
+  // Compute submenu position relative to the parent item
+  const getSubmenuPosition = useCallback((itemId: string) => {
+    const menu = menuRef.current;
+    if (!menu) return { x: adjustedPos.x + 200, y: adjustedPos.y };
+    const menuRect = menu.getBoundingClientRect();
+    const itemEl = menu.querySelector(`[data-submenu-id="${itemId}"]`) as HTMLElement | null;
+    const itemRect = itemEl?.getBoundingClientRect();
+    const y = itemRect ? itemRect.top : adjustedPos.y;
+    // Try right side; if too close to edge, flip left
+    const vw = globalThis.innerWidth;
+    const x = menuRect.right + 200 > vw
+      ? menuRect.left - 200
+      : menuRect.right;
+    return { x, y };
+  }, [adjustedPos]);
 
   return (
     <div
@@ -292,7 +406,7 @@ function ContextMenuOverlay() {
         position: 'fixed',
         left: adjustedPos.x,
         top: adjustedPos.y,
-        zIndex: 10000,
+        zIndex: 10000 + depth,
       }}
       role="menu"
       tabIndex={-1}
@@ -308,17 +422,61 @@ function ContextMenuOverlay() {
             role="menuitem"
             disabled={item.disabled}
             tabIndex={index === focusedIndex ? 0 : -1}
+            data-submenu-id={item.children ? item.id : undefined}
+            onMouseEnter={() => handleItemMouseEnter(item, index)}
             onClick={() => {
-              item.action?.();
-              close();
+              if (item.children && item.children.length > 0) {
+                setOpenSubmenuId(item.id);
+              } else {
+                item.action?.();
+                onClose();
+              }
             }}
           >
             {item.icon && <span className="context-menu-icon">{item.icon}</span>}
             <span className="context-menu-label">{item.label}</span>
-            {item.shortcut && <span className="context-menu-shortcut">{item.shortcut}</span>}
+            {item.children && item.children.length > 0 ? (
+              <span className="context-menu-submenu-arrow">{'\u203A'}</span>
+            ) : (
+              item.shortcut && <span className="context-menu-shortcut">{item.shortcut}</span>
+            )}
           </button>
         ),
       )}
+      {/* Render open submenu */}
+      {openSubmenuId && (() => {
+        const parentItem = items.find((i) => i.id === openSubmenuId);
+        if (!parentItem?.children) return null;
+        return (
+          <MenuPanel
+            items={parentItem.children}
+            position={getSubmenuPosition(openSubmenuId)}
+            onClose={() => {
+              setOpenSubmenuId(null);
+              // Return focus to parent menu
+              menuRef.current?.focus();
+            }}
+            depth={depth + 1}
+          />
+        );
+      })()}
     </div>
+  );
+}
+
+function ContextMenuOverlay() {
+  const visible = useContextMenuStore((s) => s.visible);
+  const position = useContextMenuStore((s) => s.position);
+  const items = useContextMenuStore((s) => s.items);
+  const close = useContextMenuStore((s) => s.close);
+
+  if (!visible) return null;
+
+  return (
+    <MenuPanel
+      items={items}
+      position={position}
+      onClose={close}
+    />
   );
 }

@@ -94,7 +94,7 @@ Sistema precisa gerenciar estado em **duas camadas distintas**:
 │           ↑ shared via MF                    │
 └───────────┼──────────────────────────────────┘
             │
-            │ import { useWindowsStore } from '@archbase-workspace/state'
+            │ import { useWindowsStore } from '@archbase/workspace-state'
             │
 ┌───────────┼──────────────────────────────────┐
 │  App A    ↓                                   │
@@ -476,7 +476,7 @@ shared: {
     singleton: true,
     requiredVersion: '^2.6.0'
   },
-  '@archbase-workspace/state': {    // Package com stores Zustand
+  '@archbase/workspace-state': {    // Package com stores Zustand
     singleton: true
   }
 }
@@ -486,7 +486,7 @@ shared: {
 
 ```typescript
 // apps/calculator/src/App.tsx
-import { useWindowsStore } from '@archbase-workspace/state'; // Via MF shared
+import { useWindowsStore } from '@archbase/workspace-state'; // Via MF shared
 import { Provider } from 'jotai';                  // Via MF shared
 import { valueAtom } from './state/atoms';         // Local
 

@@ -249,6 +249,30 @@ describe('createWorkspaceSDK', () => {
     });
   });
 
+  describe('windows lifecycle (minimize/maximize/restore)', () => {
+    it('minimizes the current window', () => {
+      const windowId = useWindowsStore.getState().openWindow({ appId: 'test-app', title: 'Test' });
+      const sdk = createWorkspaceSDK('test-app', windowId);
+      sdk.windows.minimize();
+      expect(useWindowsStore.getState().getWindow(windowId)?.state).toBe('minimized');
+    });
+
+    it('maximizes the current window', () => {
+      const windowId = useWindowsStore.getState().openWindow({ appId: 'test-app', title: 'Test' });
+      const sdk = createWorkspaceSDK('test-app', windowId);
+      sdk.windows.maximize();
+      expect(useWindowsStore.getState().getWindow(windowId)?.state).toBe('maximized');
+    });
+
+    it('restores a minimized window', () => {
+      const windowId = useWindowsStore.getState().openWindow({ appId: 'test-app', title: 'Test' });
+      const sdk = createWorkspaceSDK('test-app', windowId);
+      sdk.windows.minimize();
+      sdk.windows.restore();
+      expect(useWindowsStore.getState().getWindow(windowId)?.state).toBe('normal');
+    });
+  });
+
   describe('contextMenu service', () => {
     it('opens a context menu', () => {
       const sdk = createWorkspaceSDK('test-app', 'win-1');
@@ -259,6 +283,24 @@ describe('createWorkspaceSDK', () => {
       expect(state.visible).toBe(true);
       expect(state.position).toEqual({ x: 100, y: 200 });
       expect(state.items).toHaveLength(1);
+    });
+  });
+
+  describe('permissions service (base SDK fail-closed stubs)', () => {
+    it('check always returns denied', () => {
+      const sdk = createWorkspaceSDK('test-app', 'win-1');
+      expect(sdk.permissions.check('notifications')).toBe('denied');
+    });
+
+    it('request always resolves to false', async () => {
+      const sdk = createWorkspaceSDK('test-app', 'win-1');
+      const result = await sdk.permissions.request('storage');
+      expect(result).toBe(false);
+    });
+
+    it('list always returns empty array', () => {
+      const sdk = createWorkspaceSDK('test-app', 'win-1');
+      expect(sdk.permissions.list()).toEqual([]);
     });
   });
 });

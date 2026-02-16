@@ -12,4 +12,6 @@ export interface ContextMenuItem {
   /** When true, renders as a separator line instead of a clickable item */
   separator?: boolean;
   action?: () => void;
+  /** Nested submenu items. When present, this item acts as a submenu trigger. */
+  children?: ContextMenuItem[];
 }

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useWindow, useWindowsStore } from '@archbase/workspace-state';
+import { useWindow, useWindowsStore, useContextMenuStore } from '@archbase/workspace-state';
+import type { ContextMenuItem } from '@archbase/workspace-types';
 import { LAYOUT } from '../constants';
 
 interface WindowHeaderProps {
@@ -39,6 +40,51 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
     handleMaximize(e);
   }, [handleMaximize]);
 
+  const openContextMenu = useContextMenuStore((s) => s.open);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window) return;
+
+    const items: ContextMenuItem[] = [];
+
+    if (window.flags.minimizable) {
+      items.push({
+        id: 'minimize',
+        label: window.state === 'minimized' ? 'Restore' : 'Minimize',
+        action: () => window.state === 'minimized'
+          ? useWindowsStore.getState().focusWindow(windowId)
+          : minimizeWindow(windowId),
+      });
+    }
+
+    if (window.flags.maximizable) {
+      items.push({
+        id: 'maximize',
+        label: window.state === 'maximized' ? 'Restore' : 'Maximize',
+        action: () => toggleMaximize(
+          windowId,
+          globalThis.innerWidth,
+          globalThis.innerHeight,
+          LAYOUT.TASKBAR_HEIGHT,
+        ),
+      });
+    }
+
+    if (window.flags.closable) {
+      items.push({ id: 'sep-close', label: '', separator: true });
+      items.push({
+        id: 'close',
+        label: 'Close',
+        shortcut: 'Cmd+W',
+        action: () => closeWindow(windowId),
+      });
+    }
+
+    openContextMenu({ x: e.clientX, y: e.clientY }, items);
+  }, [window, windowId, minimizeWindow, toggleMaximize, closeWindow, openContextMenu]);
+
   if (!window) return null;
 
   return (
@@ -47,6 +93,7 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
       aria-label={`${window.title} window controls`}
       onPointerDown={onDragPointerDown}
       onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
       style={{
         height: 'var(--window-header-height)',
         background: isFocused ? 'var(--window-header-bg-active)' : 'var(--window-header-bg)',

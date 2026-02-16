@@ -12,6 +12,7 @@ export { useWindowContext } from './hooks/useWindowContext';
 export { useCommand } from './hooks/useCommand';
 export { useSettingValue } from './hooks/useSetting';
 export { useStorage } from './hooks/useStorage';
+export { useTheme } from './hooks/useTheme';
 
 // Bridge (for sandboxed iframe apps)
 export { createHostBridge } from './bridge/hostBridge';
