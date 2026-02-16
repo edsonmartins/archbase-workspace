@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import type { AppManifest, ManifestSource, Unsubscribe } from '@archbase/workspace-types';
 import { validateManifestSafe } from '../schemas/manifest';
+import { processContributions, removeContributions } from '../services/contributionProcessor';
 
 // ============================================================
 // Constants
@@ -112,6 +113,8 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
           return { apps };
         });
 
+        processContributions(manifest);
+
         return manifest.id;
       },
 
@@ -192,9 +195,7 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
         }
 
         const now = Date.now();
-        if (ids.length === urls.length) {
-          set({ status: 'ready', lastDiscoveryAt: now });
-        } else if (ids.length > 0) {
+        if (ids.length > 0) {
           set({ status: 'ready', lastDiscoveryAt: now });
         } else {
           set({ status: 'error', lastDiscoveryAt: now });
@@ -204,6 +205,7 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
       },
 
       unregister: (id) => {
+        removeContributions(id);
         set((state) => {
           const apps = new Map(state.apps);
           apps.delete(id);
@@ -212,6 +214,8 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
       },
 
       clearAll: () => {
+        const apps = get().apps;
+        apps.forEach((_, id) => removeContributions(id));
         set({ apps: new Map(), errors: [], status: 'idle', lastDiscoveryAt: null });
       },
 

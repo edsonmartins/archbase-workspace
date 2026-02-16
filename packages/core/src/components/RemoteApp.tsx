@@ -1,6 +1,10 @@
-import React, { Suspense, Component, type ReactNode, useCallback, useState } from 'react';
+import React, { Suspense, Component, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { registryQueries } from '@archbase/workspace-state';
+import { createSecureSDK, WorkspaceProvider } from '@archbase/workspace-sdk';
+import type { AppManifest } from '@archbase/workspace-types';
+import { ShadowContainer } from './ShadowContainer';
+import { SandboxedApp } from './SandboxedApp';
 
 interface RemoteAppProps {
   appId: string;
@@ -47,47 +51,76 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-// Cache loaded remote components
+// Cache loaded remote components by MF name
 const remoteComponents: Record<string, React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>> = {};
 
-function getRemoteComponent(appId: string) {
-  if (!remoteComponents[appId]) {
-    remoteComponents[appId] = React.lazy(async () => {
-      const module = await loadRemote<{ default: React.ComponentType<Record<string, unknown>> }>(`${appId}/App`);
+function getRemoteComponent(mfName: string) {
+  if (!remoteComponents[mfName]) {
+    remoteComponents[mfName] = React.lazy(async () => {
+      const module = await loadRemote<{ default: React.ComponentType<Record<string, unknown>> }>(`${mfName}/App`);
       if (!module) {
-        throw new Error(`Failed to load remote app: ${appId}`);
+        throw new Error(`Failed to load remote app: ${mfName}`);
       }
       return module;
     });
   }
-  return remoteComponents[appId];
+  return remoteComponents[mfName];
 }
 
-function clearRemoteCache(appId: string) {
-  delete remoteComponents[appId];
-}
-
-function getAppDisplayName(appId: string): string {
-  const manifest = registryQueries.getAppByName(appId);
-  return manifest?.displayName || manifest?.name || appId;
+function clearRemoteCache(mfName: string) {
+  delete remoteComponents[mfName];
 }
 
 export function RemoteApp({ appId, windowId }: RemoteAppProps) {
   const [retryCount, setRetryCount] = useState(0);
-  const appName = getAppDisplayName(appId);
+
+  // appId is the manifest id (e.g., 'dev.archbase.hello-world').
+  // We look up the manifest to get the MF name (e.g., 'hello_world') for loadRemote().
+  const manifest = registryQueries.getApp(appId);
+  const mfName = manifest?.name ?? appId;
+  const displayName = manifest?.displayName ?? mfName;
+  const isSandboxed = !!manifest?.sandbox;
+
+  // Always use createSecureSDK — even without a manifest, use a deny-all fallback
+  // to prevent permission bypass when registry lookup fails
+  const fallbackManifest: AppManifest = useMemo(() => ({
+    id: appId,
+    name: mfName,
+    version: '0.0.0',
+    entrypoint: '',
+    remoteEntry: '',
+    permissions: [], // No permissions → all guarded services blocked
+  }), [appId, mfName]);
+
+  const sdk = useMemo(
+    () => createSecureSDK(appId, windowId, manifest ?? fallbackManifest),
+    [appId, windowId, manifest, fallbackManifest],
+  );
 
   const handleRetry = useCallback(() => {
-    clearRemoteCache(appId);
+    clearRemoteCache(mfName);
     setRetryCount((c) => c + 1);
-  }, [appId]);
+  }, [mfName]);
 
-  const RemoteComponent = getRemoteComponent(appId);
+  // Sandboxed iframe mode: completely different rendering path
+  if (isSandboxed && manifest) {
+    return <SandboxedApp appId={appId} windowId={windowId} manifest={manifest} />;
+  }
+
+  const useShadow = manifest?.isolation?.css === 'shadow' || manifest?.isolation?.css === true;
+  const RemoteComponent = getRemoteComponent(mfName);
+
+  const content = (
+    <Suspense fallback={<div className="remote-app-loading">Loading {displayName}...</div>}>
+      <RemoteComponent windowId={windowId} />
+    </Suspense>
+  );
 
   return (
-    <ErrorBoundary key={retryCount} appName={appName} onRetry={handleRetry}>
-      <Suspense fallback={<div className="remote-app-loading">Loading {appName}...</div>}>
-        <RemoteComponent windowId={windowId} />
-      </Suspense>
-    </ErrorBoundary>
+    <WorkspaceProvider value={sdk}>
+      <ErrorBoundary key={retryCount} appName={displayName} onRetry={handleRetry}>
+        {useShadow ? <ShadowContainer>{content}</ShadowContainer> : content}
+      </ErrorBoundary>
+    </WorkspaceProvider>
   );
 }

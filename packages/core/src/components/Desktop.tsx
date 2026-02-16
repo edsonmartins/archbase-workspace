@@ -9,6 +9,8 @@ import { Taskbar } from './Taskbar';
 import { AppLauncher } from './AppLauncher';
 import { SnapPreview } from './SnapPreview';
 import { ToastContainer } from './ToastContainer';
+import { CommandPalette } from './CommandPalette';
+import { PermissionPrompt } from './PermissionPrompt';
 
 export function Desktop() {
   useRegistryInit();
@@ -20,6 +22,7 @@ export function Desktop() {
   const initialized = useRef(false);
 
   const [launcherVisible, setLauncherVisible] = useState(false);
+  const [commandPaletteVisible, setCommandPaletteVisible] = useState(false);
   const [snapZone, setSnapZone] = useState<SnapZone | null>(null);
 
   const openContextMenu = useContextMenuStore((s) => s.open);
@@ -30,7 +33,18 @@ export function Desktop() {
     setLauncherVisible((v) => !v);
   }, []);
 
-  useGlobalKeyboardListener({ onToggleLauncher: toggleLauncher });
+  const toggleCommandPalette = useCallback(() => {
+    setCommandPaletteVisible((v) => !v);
+  }, []);
+
+  const closeCommandPalette = useCallback(() => {
+    setCommandPaletteVisible(false);
+  }, []);
+
+  useGlobalKeyboardListener({
+    onToggleLauncher: toggleLauncher,
+    onToggleCommandPalette: toggleCommandPalette,
+  });
 
   // Open a default window once registry is ready
   useEffect(() => {
@@ -39,7 +53,7 @@ export function Desktop() {
 
     const defaultApp = apps[0];
     openWindow({
-      appId: defaultApp.name,
+      appId: defaultApp.id,
       title: defaultApp.displayName || defaultApp.name,
       width: defaultApp.window?.defaultWidth ?? 500,
       height: defaultApp.window?.defaultHeight ?? 400,
@@ -50,7 +64,7 @@ export function Desktop() {
   const handleOpenApp = useCallback(
     (app: AppManifest) => {
       openWindow({
-        appId: app.name,
+        appId: app.id,
         title: app.displayName || app.name,
         width: app.window?.defaultWidth,
         height: app.window?.defaultHeight,
@@ -159,6 +173,8 @@ export function Desktop() {
         onOpenApp={handleOpenApp}
       />
       <ToastContainer />
+      <CommandPalette visible={commandPaletteVisible} onClose={closeCommandPalette} />
+      <PermissionPrompt />
     </div>
   );
 }

@@ -232,6 +232,85 @@ describe('Manifest Zod Schema', () => {
     });
   });
 
+  describe('isolation validation', () => {
+    it('accepts isolation: { css: true }', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, isolation: { css: true } });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts isolation: { css: "shadow" }', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, isolation: { css: 'shadow' } });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts isolation: { css: false }', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, isolation: { css: false } });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects isolation: { css: "invalid" }', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, isolation: { css: 'invalid' } });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts isolation: {} (css is optional)', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, isolation: {} });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('sandbox validation', () => {
+    it('accepts sandbox: true', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, sandbox: true });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts sandbox: false', () => {
+      const result = appManifestSchema.safeParse({ ...MINIMAL_MANIFEST, sandbox: false });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts sandbox object with valid allow tokens', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        sandbox: { allow: ['allow-scripts', 'allow-forms', 'allow-popups'] },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects allow-same-origin in sandbox allow list', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        sandbox: { allow: ['allow-same-origin'] },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects unknown sandbox tokens', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        sandbox: { allow: ['allow-everything'] },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts sandbox with url and origin', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        sandbox: { url: 'https://example.com/app.html', origin: 'https://example.com' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects sandbox with invalid origin URL', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        sandbox: { origin: 'not-a-url' },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('validateManifest (throwing)', () => {
     it('returns parsed data for valid manifest', () => {
       const result = validateManifest(MINIMAL_MANIFEST);

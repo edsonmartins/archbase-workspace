@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAllWindows, useWindowsStore, useFocusedWindowId } from '@archbase/workspace-state';
 import type { AppManifest } from '@archbase/workspace-types';
+import { StatusBarWidgets } from './StatusBarWidgets';
 
 interface TaskbarProps {
   apps: AppManifest[];
@@ -109,6 +110,8 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
           )}
         </button>
       ))}
+
+      <StatusBarWidgets />
     </nav>
   );
 }

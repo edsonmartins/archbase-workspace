@@ -66,22 +66,31 @@ const BUILT_IN_SHORTCUTS: Shortcut[] = [
     scope: 'global',
     enabled: true,
   },
+  {
+    id: 'workspace.openCommandPalette',
+    combo: platformCombo('Cmd+Shift+P'),
+    label: 'Open Command Palette',
+    scope: 'global',
+    enabled: true,
+  },
 ];
 
 interface UseGlobalKeyboardListenerOptions {
   onToggleLauncher: () => void;
+  onToggleCommandPalette: () => void;
 }
 
 /**
  * Registers built-in keyboard shortcuts and listens for keydown events globally.
  * Should be called once in the Desktop component.
  */
-export function useGlobalKeyboardListener({ onToggleLauncher }: UseGlobalKeyboardListenerOptions) {
+export function useGlobalKeyboardListener({ onToggleLauncher, onToggleCommandPalette }: UseGlobalKeyboardListenerOptions) {
   const actionsRef = useRef<Map<string, () => void>>(new Map());
 
   // Keep action handlers up to date
   useEffect(() => {
     actionsRef.current.set('workspace.openLauncher', onToggleLauncher);
+    actionsRef.current.set('workspace.openCommandPalette', onToggleCommandPalette);
     actionsRef.current.set('workspace.closeWindow', () => {
       const focused = useWindowsStore.getState().getFocusedWindow();
       if (focused) useWindowsStore.getState().closeWindow(focused.id);
@@ -110,7 +119,7 @@ export function useGlobalKeyboardListener({ onToggleLauncher }: UseGlobalKeyboar
       const vh = globalThis.innerHeight;
       useWindowsStore.getState().cascadeWindows(vw, vh, LAYOUT.TASKBAR_HEIGHT);
     });
-  }, [onToggleLauncher]);
+  }, [onToggleLauncher, onToggleCommandPalette]);
 
   // Register built-in shortcuts once
   useEffect(() => {

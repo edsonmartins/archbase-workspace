@@ -111,6 +111,40 @@ const repositorySchema = z.object({
   url: z.string().min(1),
 });
 
+const isolationConfigSchema = z.object({
+  css: z.union([z.boolean(), z.literal('shadow')]).optional(),
+}).optional();
+
+/** Valid HTML sandbox permission tokens (excluding dangerous ones) */
+const VALID_SANDBOX_TOKENS = [
+  'allow-downloads',
+  'allow-forms',
+  'allow-modals',
+  'allow-orientation-lock',
+  'allow-pointer-lock',
+  'allow-popups',
+  'allow-popups-to-escape-sandbox',
+  'allow-presentation',
+  'allow-scripts',
+  'allow-top-navigation',
+  'allow-top-navigation-by-user-activation',
+  'allow-top-navigation-to-custom-protocols',
+] as const;
+
+const sandboxTokenSchema = z.string().refine(
+  (val) => (VALID_SANDBOX_TOKENS as readonly string[]).includes(val),
+  { message: 'Invalid or dangerous sandbox token. Allowed: allow-downloads, allow-forms, allow-modals, allow-popups, allow-scripts, etc. "allow-same-origin" is forbidden.' },
+);
+
+const sandboxConfigSchema = z.union([
+  z.boolean(),
+  z.object({
+    url: z.string().url().optional(),
+    allow: z.array(sandboxTokenSchema).optional(),
+    origin: z.string().url().optional(),
+  }),
+]).optional();
+
 const sourceSchema = z.enum(['local', 'remote', 'registry']);
 
 export const appManifestSchema = z.object({
@@ -141,6 +175,8 @@ export const appManifestSchema = z.object({
   shared: z.record(z.string(), z.string()).optional(),
   exposes: z.record(z.string(), z.string()).optional(),
   permissions: z.array(permissionSchema).optional(),
+  isolation: isolationConfigSchema,
+  sandbox: sandboxConfigSchema,
   contributes: contributionPointsSchema.optional(),
   activationEvents: z.array(activationEventSchema).optional(),
   lifecycle: lifecycleConfigSchema.optional(),

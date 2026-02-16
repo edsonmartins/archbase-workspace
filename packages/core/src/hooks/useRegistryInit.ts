@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useAppRegistryStore, useRegistryStatus } from '@archbase/workspace-state';
+import { useAppRegistryStore, useRegistryStatus, activationService } from '@archbase/workspace-state';
 import { KNOWN_MANIFESTS } from '../knownManifests';
 import { registerAllMFRemotes } from '../services/remoteLoader';
+import { injectGlobalSDK } from '../services/sdkGlobal';
 
 /**
  * Initializes the AppRegistry with known manifests and registers MF remotes.
@@ -19,14 +20,25 @@ export function useRegistryInit(): void {
 
     setStatus('loading');
 
-    // Register known manifests (sync validation)
-    registerManifests(KNOWN_MANIFESTS);
+    try {
+      // Register known manifests (sync validation)
+      registerManifests(KNOWN_MANIFESTS);
 
-    // Register all validated apps as MF remotes
-    const allApps = Array.from(useAppRegistryStore.getState().apps.values());
-    registerAllMFRemotes(allApps);
+      // Register all validated apps as MF remotes
+      const allApps = Array.from(useAppRegistryStore.getState().apps.values());
+      registerAllMFRemotes(allApps);
 
-    setStatus('ready');
+      // Inject global SDK factory for non-React apps
+      injectGlobalSDK();
+
+      // Initialize activation service (fires onDesktopReady)
+      activationService.init();
+
+      setStatus('ready');
+    } catch (err) {
+      console.error('[useRegistryInit] Initialization failed:', err);
+      setStatus('error');
+    }
   }, [registerManifests, setStatus]);
 }
 

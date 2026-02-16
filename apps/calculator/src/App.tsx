@@ -1,4 +1,5 @@
 import { Provider, useAtomValue, useSetAtom } from 'jotai';
+import { useWorkspace, useCommand, useSettingValue } from '@archbase/workspace-sdk';
 import {
   displayValueAtom,
   operationAtom,
@@ -59,9 +60,27 @@ function CalculatorUI() {
   const inputDecimal = useSetAtom(inputDecimalAtom);
   const performOperation = useSetAtom(performOperationAtom);
   const calculate = useSetAtom(calculateAtom);
-  const clear = useSetAtom(clearAtom);
+  const clearCalc = useSetAtom(clearAtom);
   const toggleSign = useSetAtom(toggleSignAtom);
   const percent = useSetAtom(percentAtom);
+
+  const sdk = useWorkspace();
+  const [precisionRaw] = useSettingValue<number>('calculator.decimalPrecision');
+  const precision = precisionRaw ?? 2;
+
+  // Register clear command
+  useCommand('calculator.clear', () => {
+    clearCalc();
+    sdk.notifications.info('Calculator', 'Cleared');
+  });
+
+  // Format display based on precision setting
+  const formattedDisplay = (() => {
+    const num = parseFloat(display);
+    if (isNaN(num) || display.endsWith('.')) return display;
+    if (Number.isInteger(num)) return display;
+    return num.toFixed(precision);
+  })();
 
   return (
     <div
@@ -89,7 +108,7 @@ function CalculatorUI() {
           minHeight: 56,
         }}
       >
-        {display}
+        {formattedDisplay}
       </div>
 
       {operation && (
@@ -114,7 +133,7 @@ function CalculatorUI() {
           flex: 1,
         }}
       >
-        <CalcButton label="AC" onClick={() => clear()} variant="function" />
+        <CalcButton label="AC" onClick={() => clearCalc()} variant="function" />
         <CalcButton label="+/-" onClick={() => toggleSign()} variant="function" />
         <CalcButton label="%" onClick={() => percent()} variant="function" />
         <CalcButton label="/" onClick={() => performOperation('/')} variant="operator" />

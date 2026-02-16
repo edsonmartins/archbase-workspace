@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useWorkspace, useCommand, useStorage } from '@archbase/workspace-sdk';
 
 interface Note {
   id: string;
@@ -7,16 +8,19 @@ interface Note {
   updatedAt: number;
 }
 
+const DEFAULT_NOTES: Note[] = [
+  {
+    id: '1',
+    title: 'Welcome',
+    content: 'Welcome to Notes! Start typing to create your first note.',
+    updatedAt: Date.now(),
+  },
+];
+
 export default function Notes() {
-  const [notes, setNotes] = useState<Note[]>([
-    {
-      id: '1',
-      title: 'Welcome',
-      content: 'Welcome to Notes! Start typing to create your first note.',
-      updatedAt: Date.now(),
-    },
-  ]);
-  const [activeNoteId, setActiveNoteId] = useState<string>('1');
+  const sdk = useWorkspace();
+  const [notes, setNotes] = useStorage<Note[]>('notes', DEFAULT_NOTES);
+  const [activeNoteId, setActiveNoteId] = useStorage<string>('activeNoteId', '1');
 
   const activeNote = notes.find((n) => n.id === activeNoteId);
 
@@ -27,24 +31,25 @@ export default function Notes() {
       content: '',
       updatedAt: Date.now(),
     };
-    setNotes((prev) => [newNote, ...prev]);
+    setNotes([newNote, ...notes]);
     setActiveNoteId(newNote.id);
-  }, []);
+  }, [notes, setNotes, setActiveNoteId]);
 
   const handleDeleteNote = useCallback(
     (id: string) => {
-      setNotes((prev) => prev.filter((n) => n.id !== id));
+      const remaining = notes.filter((n) => n.id !== id);
+      setNotes(remaining);
       if (activeNoteId === id) {
-        setActiveNoteId(notes[0]?.id ?? '');
+        setActiveNoteId(remaining[0]?.id ?? '');
       }
     },
-    [activeNoteId, notes],
+    [activeNoteId, notes, setNotes, setActiveNoteId],
   );
 
   const handleUpdateContent = useCallback(
     (content: string) => {
-      setNotes((prev) =>
-        prev.map((n) =>
+      setNotes(
+        notes.map((n) =>
           n.id === activeNoteId
             ? {
                 ...n,
@@ -56,8 +61,21 @@ export default function Notes() {
         ),
       );
     },
-    [activeNoteId],
+    [activeNoteId, notes, setNotes],
   );
+
+  // Register commands
+  useCommand('notes.new', () => {
+    handleAddNote();
+    sdk.notifications.info('Notes', 'New note created');
+  });
+
+  useCommand('notes.delete', () => {
+    if (activeNote) {
+      handleDeleteNote(activeNote.id);
+      sdk.notifications.info('Notes', 'Note deleted');
+    }
+  });
 
   return (
     <div style={{ display: 'flex', height: '100%', fontFamily: 'sans-serif' }}>

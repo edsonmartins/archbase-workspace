@@ -12,6 +12,8 @@ declare const process: { env: Record<string, string | undefined> };
 const MF_HELLO_WORLD_URL = process.env.MF_HELLO_WORLD_URL || 'http://localhost:3001';
 const MF_CALCULATOR_URL = process.env.MF_CALCULATOR_URL || 'http://localhost:3002';
 const MF_NOTES_URL = process.env.MF_NOTES_URL || 'http://localhost:3003';
+const MF_FILE_EXPLORER_URL = process.env.MF_FILE_EXPLORER_URL || 'http://localhost:3004';
+const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
 
 export const KNOWN_MANIFESTS: AppManifest[] = [
   {
@@ -34,6 +36,18 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
       closable: true,
     },
     source: 'local',
+    permissions: ['notifications'],
+    activationEvents: ['onCommand:hello-world.greet'],
+    contributes: {
+      commands: [
+        {
+          id: 'hello-world.greet',
+          title: 'Greet',
+          category: 'Hello World',
+          icon: '👋',
+        },
+      ],
+    },
   },
   {
     id: 'dev.archbase.calculator',
@@ -57,6 +71,25 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
       closable: true,
     },
     source: 'local',
+    permissions: ['notifications'],
+    contributes: {
+      commands: [
+        {
+          id: 'calculator.clear',
+          title: 'Clear',
+          category: 'Calculator',
+          icon: '🧹',
+        },
+      ],
+      settings: [
+        {
+          key: 'calculator.decimalPrecision',
+          type: 'number',
+          default: 2,
+          description: 'Number of decimal places to display',
+        },
+      ],
+    },
   },
   {
     id: 'dev.archbase.notes',
@@ -78,5 +111,96 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
       closable: true,
     },
     source: 'local',
+    permissions: ['notifications', 'storage'],
+    activationEvents: ['onCommand:notes.new'],
+    contributes: {
+      commands: [
+        {
+          id: 'notes.new',
+          title: 'New Note',
+          category: 'Notes',
+          icon: '📄',
+        },
+        {
+          id: 'notes.delete',
+          title: 'Delete Note',
+          category: 'Notes',
+          icon: '🗑️',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.file-explorer',
+    name: 'file_explorer',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_FILE_EXPLORER_URL}/mf-manifest.json`,
+    displayName: 'File Explorer',
+    description: 'Virtual filesystem browser',
+    icon: '📁',
+    window: {
+      defaultWidth: 700,
+      defaultHeight: 500,
+      minWidth: 400,
+      minHeight: 300,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: [],
+    activationEvents: ['onDesktopReady'],
+    contributes: {
+      commands: [
+        {
+          id: 'file-explorer.newFile',
+          title: 'New File',
+          category: 'File Explorer',
+          icon: '📄',
+        },
+        {
+          id: 'file-explorer.newFolder',
+          title: 'New Folder',
+          category: 'File Explorer',
+          icon: '📁',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.settings',
+    name: 'settings',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_SETTINGS_URL}/mf-manifest.json`,
+    displayName: 'Settings',
+    description: 'Workspace settings manager',
+    icon: '⚙️',
+    window: {
+      defaultWidth: 600,
+      defaultHeight: 500,
+      minWidth: 400,
+      minHeight: 300,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: [],
+    activationEvents: ['onCommand:workspace.openSettings'],
+    contributes: {
+      commands: [
+        {
+          id: 'workspace.openSettings',
+          title: 'Open Settings',
+          category: 'Workspace',
+          icon: '⚙️',
+          keybinding: 'Cmd+,',
+        },
+      ],
+    },
   },
 ];

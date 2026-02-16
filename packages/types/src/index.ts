@@ -3,6 +3,7 @@ export * from './shortcuts';
 export * from './notifications';
 export * from './contextMenu';
 export * from './snap';
+export * from './sdk';
 
 // ============================================================
 // Window Types (RFC-001: Window Service API)
@@ -166,6 +167,31 @@ export type Permission =
   | 'camera'
   | 'microphone';
 
+// ============================================================
+// Permission & Security Types (Phase 5)
+// ============================================================
+
+export type PermissionGrant = 'granted' | 'denied' | 'prompt';
+
+export interface PermissionRecord {
+  permission: Permission;
+  grant: PermissionGrant;
+  decidedAt: number;
+}
+
+export interface IsolationConfig {
+  css?: boolean | 'shadow';
+}
+
+export interface SandboxConfig {
+  /** URL to an HTML page to load in the sandbox iframe */
+  url?: string;
+  /** Additional sandbox permissions (e.g., 'allow-forms'). 'allow-same-origin' is rejected for security. */
+  allow?: string[];
+  /** Expected origin of the iframe for postMessage validation */
+  origin?: string;
+}
+
 export interface Command {
   id: string;
   title: string;
@@ -261,10 +287,46 @@ export interface AppManifest {
   shared?: Record<string, string>;
   exposes?: Record<string, string>;
   permissions?: Permission[];
+  isolation?: IsolationConfig;
+  sandbox?: boolean | SandboxConfig;
   contributes?: ContributionPoints;
   activationEvents?: ActivationEvent[];
   lifecycle?: LifecycleConfig;
   dependencies?: Record<string, string>;
   platform?: PlatformConfig;
   source?: ManifestSource;
+}
+
+// ============================================================
+// Runtime Registration Types (Phase 4: Plugin System)
+// ============================================================
+
+/** Handler function for commands */
+export type CommandHandler = (...args: unknown[]) => void | Promise<void>;
+
+/** A command registered at runtime (manifest command + runtime state) */
+export interface RegisteredCommand extends Command {
+  handler?: CommandHandler;
+  source: string;
+  enabled: boolean;
+}
+
+/** A widget registered at runtime (manifest widget + runtime state) */
+export interface RegisteredWidget extends Widget {
+  source: string;
+  visible: boolean;
+  order: number;
+}
+
+/** A menu item registered at runtime with its source app */
+export interface RegisteredMenuItem extends MenuItem {
+  source: string;
+}
+
+/** A settings entry stored at runtime */
+export interface SettingsEntry {
+  key: string;
+  value: SettingValue;
+  source: string;
+  schema: Setting<SettingValue>;
 }

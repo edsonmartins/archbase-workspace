@@ -52,6 +52,9 @@ export default defineConfig({
       shared: {
         react: { singleton: true, requiredVersion: '^19.0.0' },
         'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+        zustand: { singleton: true, requiredVersion: '^5.0.0' },
+        '@archbase/workspace-sdk': { singleton: true },
+        '@archbase/workspace-state': { singleton: true },
       },
     }),
   ],
