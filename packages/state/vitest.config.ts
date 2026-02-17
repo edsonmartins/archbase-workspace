@@ -1,3 +1,4 @@
+import path from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -15,7 +16,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@archbase/workspace-types': '../types/src/index.ts',
+      '@archbase/workspace-types': path.resolve(__dirname, '../types/src/index.ts'),
     },
   },
 });

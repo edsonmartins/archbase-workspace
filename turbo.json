@@ -5,6 +5,13 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@archbase/collaboration#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "@archbase/draw-wasm#build": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true

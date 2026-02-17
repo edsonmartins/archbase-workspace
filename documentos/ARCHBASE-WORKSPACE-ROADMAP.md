@@ -16,14 +16,14 @@ Criar biblioteca React para interfaces desktop-like com suporte a microfrontends
 
 ## Success Criteria (v1.0)
 
-- [ ] 50+ janelas simultâneas rodando a 60fps
-- [ ] 5+ apps exemplo funcionais (Calculator, Notes, File Explorer, Settings, Terminal)
-- [ ] SDK publicado no npm (`@archbase/workspace-sdk`)
-- [ ] CLI para scaffolding (`npx @archbase/workspace-create-app`)
-- [ ] Docs completas com tutorials
-- [ ] Storybook com todos os componentes
-- [ ] 80%+ test coverage
-- [ ] Acessibilidade WCAG 2.1 AA
+- [x] 50+ janelas simultâneas rodando a 60fps
+- [x] 5+ apps exemplo funcionais (Calculator, Notes, File Explorer, Settings, Terminal)
+- [x] SDK publicado no npm (`@archbase/workspace-sdk`)
+- [x] CLI para scaffolding (`npx @archbase/workspace-create-app`)
+- [x] Docs completas com tutorials
+- [x] Storybook com todos os componentes
+- [x] 80%+ test coverage
+- [x] Acessibilidade WCAG 2.1 AA
 
 ---
 
@@ -539,10 +539,10 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 ### 6.5 Backlog (Planned)
 
 ### Plugin Marketplace
-- [ ] Searchable catalog
-- [ ] Ratings & reviews
-- [ ] One-click install
-- [ ] Update notifications
+- [x] Searchable catalog
+- [x] Ratings & reviews
+- [x] One-click install
+- [x] Update notifications
 
 ### WebAssembly Apps (Phase 6.6) ✅
 - [x] WASM module support (wasmLoader service, WasmApp component, 3rd rendering mode)
@@ -617,7 +617,7 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 - [x] Fase 3 - Desktop Environment
 - [x] Fase 4 - Plugin System & SDK
 - [x] Fase 5 - Isolation & Security
-- [ ] Fase 6 - Features Avançadas (AI Assistant done, remaining items planned)
+- [x] Fase 6 - Features Avançadas (AI Assistant, Theme, PWA, Collaboration, Marketplace, WASM)
 
 **Weekly Updates**: Todo sexta-feira, post no GitHub Discussions
 

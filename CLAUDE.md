@@ -9,7 +9,7 @@ A multi-app workspace that unifies web systems from different frameworks (React,
 - **UI**: React 19
 - **State**: Zustand 5 (global) + Jotai (per-app)
 - **Types**: TypeScript 5.7+ strict mode
-- **Tests**: Vitest (996+ tests) + Playwright (E2E)
+- **Tests**: Vitest (1059+ tests) + Playwright (E2E)
 - **Styling**: CSS custom properties with theme system (no CSS-in-JS, no Tailwind)
 
 ## Project Structure

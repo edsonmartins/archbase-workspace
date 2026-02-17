@@ -885,10 +885,24 @@ interface ContextMenuItem {
   id: string;
   label: string;
   icon?: string;
+  shortcut?: string;
   disabled?: boolean;
-  action: () => void;
+  separator?: boolean;
+  action?: () => void;
+  children?: ContextMenuItem[];
 }
 ```
+
+| Property     | Type                  | Description                                         |
+|--------------|-----------------------|-----------------------------------------------------|
+| `id`         | `string`              | Unique identifier for the menu item.                |
+| `label`      | `string`              | Display text for the menu item.                     |
+| `icon?`      | `string`              | Optional icon identifier.                           |
+| `shortcut?`  | `string`              | Optional keyboard shortcut hint (e.g. `"Ctrl+C"`).  |
+| `disabled?`  | `boolean`             | Whether the item is grayed out.                     |
+| `separator?` | `boolean`             | If `true`, renders a visual separator line.         |
+| `action?`    | `() => void`          | Callback when clicked. Optional for separators.     |
+| `children?`  | `ContextMenuItem[]`   | Nested sub-menu items.                              |
 
 ---
 
@@ -1624,4 +1638,16 @@ The following table lists all public exports from `@archbase/workspace-sdk`:
 | `BridgeError`            | Type       | Bridge      |
 | `BridgeEvent`            | Type       | Bridge      |
 | `BridgeMessage`          | Type       | Bridge      |
+| `useTheme`               | Hook       | Hooks       |
+| `useAsyncStorage`        | Hook       | Hooks       |
+| `useCollaboration`       | Hook       | Hooks       |
+| `createAsyncStorageService` | Function | Storage     |
+| `IndexedDBProvider`      | Class      | Storage     |
+| `registerStorageProvider` | Function  | Storage     |
+| `setDefaultProvider`     | Function   | Storage     |
+| `getStorageProvider`     | Function   | Storage     |
+| `listStorageProviders`   | Function   | Storage     |
+| `LocalStorageProvider`   | Class      | Storage     |
+| `StorageProvider`        | Type       | Storage     |
+| `createCollaborationService` | Function | Collaboration |
 | `WorkspaceSDK`           | Type       | Re-export   |

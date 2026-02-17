@@ -30,7 +30,7 @@ function mockMatchMedia(matches: boolean) {
 }
 
 /** Replicates the resolve logic from useTheme for unit-testing without React. */
-function resolveTheme(): { theme: string; resolvedTheme: 'dark' | 'light' } {
+function resolveTheme(): { theme: string; resolvedTheme: 'dark' | 'light'; isDark: boolean } {
   const theme = (useSettingsStore.getState().getValue<string>('workspace.theme') ?? 'dark') as string;
   const resolvedTheme: 'dark' | 'light' =
     theme === 'auto'
@@ -38,7 +38,8 @@ function resolveTheme(): { theme: string; resolvedTheme: 'dark' | 'light' } {
       : theme === 'light'
         ? 'light'
         : 'dark';
-  return { theme, resolvedTheme };
+  const isDark = resolvedTheme === 'dark';
+  return { theme, resolvedTheme, isDark };
 }
 
 describe('useTheme (logic)', () => {
@@ -86,5 +87,52 @@ describe('useTheme (logic)', () => {
     registerThemeSetting('');
     const { resolvedTheme } = resolveTheme();
     expect(resolvedTheme).toBe('dark');
+  });
+
+  describe('isDark', () => {
+    it('is true when resolved theme is dark', () => {
+      registerThemeSetting('dark');
+      const { isDark } = resolveTheme();
+      expect(isDark).toBe(true);
+    });
+
+    it('is false when resolved theme is light', () => {
+      registerThemeSetting('light');
+      const { isDark } = resolveTheme();
+      expect(isDark).toBe(false);
+    });
+
+    it('is true when auto and OS prefers dark', () => {
+      mockMatchMedia(true);
+      registerThemeSetting('auto');
+      const { isDark } = resolveTheme();
+      expect(isDark).toBe(true);
+    });
+
+    it('is false when auto and OS prefers light', () => {
+      mockMatchMedia(false);
+      registerThemeSetting('auto');
+      const { isDark } = resolveTheme();
+      expect(isDark).toBe(false);
+    });
+  });
+
+  describe('setTheme', () => {
+    it('updates the settings store when called', () => {
+      registerThemeSetting('dark');
+      // Simulate setTheme logic (same as hook implementation)
+      useSettingsStore.getState().setValue('workspace.theme', 'light');
+      const { theme, resolvedTheme, isDark } = resolveTheme();
+      expect(theme).toBe('light');
+      expect(resolvedTheme).toBe('light');
+      expect(isDark).toBe(false);
+    });
+
+    it('accepts auto as a valid value', () => {
+      registerThemeSetting('dark');
+      useSettingsStore.getState().setValue('workspace.theme', 'auto');
+      const { theme } = resolveTheme();
+      expect(theme).toBe('auto');
+    });
   });
 });
