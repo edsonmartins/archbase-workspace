@@ -4,6 +4,8 @@ export * from './notifications';
 export * from './contextMenu';
 export * from './snap';
 export * from './sdk';
+export * from './collaboration';
+export * from './marketplace';
 
 // ============================================================
 // Window Types (RFC-001: Window Service API)
@@ -165,7 +167,8 @@ export type Permission =
   | 'filesystem.write'
   | 'network'
   | 'camera'
-  | 'microphone';
+  | 'microphone'
+  | 'collaboration';
 
 // ============================================================
 // Permission & Security Types (Phase 5)

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useCommandRegistryStore } from '@archbase/workspace-state';
 import type { RegisteredCommand } from '@archbase/workspace-types';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface CommandPaletteProps {
   visible: boolean;
@@ -12,6 +13,9 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(overlayRef, visible);
 
   const commands = useCommandRegistryStore((s) => s.getAllCommands());
 
@@ -96,6 +100,7 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
 
   return (
     <div
+      ref={overlayRef}
       className="command-palette-overlay"
       role="dialog"
       aria-modal="true"
@@ -140,7 +145,7 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
                 onClick={() => executeCommand(cmd)}
                 onMouseEnter={() => setSelectedIndex(i)}
               >
-                {cmd.icon && <span className="command-palette-icon">{cmd.icon}</span>}
+                {cmd.icon && <span className="command-palette-icon" aria-hidden="true">{cmd.icon}</span>}
                 <span className="command-palette-label">
                   {cmd.category && (
                     <span className="command-palette-category">{cmd.category}: </span>

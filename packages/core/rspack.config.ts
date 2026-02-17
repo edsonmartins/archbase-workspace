@@ -1,5 +1,6 @@
 import { defineConfig } from '@rspack/cli';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { CopyRspackPlugin } from '@rspack/core';
 import path from 'path';
 
 const MF_HELLO_WORLD_URL = process.env.MF_HELLO_WORLD_URL || 'http://localhost:3001';
@@ -9,6 +10,7 @@ const MF_FILE_EXPLORER_URL = process.env.MF_FILE_EXPLORER_URL || 'http://localho
 const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
 const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
+const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
 
 export default defineConfig({
   entry: './src/index.tsx',
@@ -52,6 +54,9 @@ export default defineConfig({
     ],
   },
   plugins: [
+    new CopyRspackPlugin({
+      patterns: [{ from: 'public', to: '.' }],
+    }),
     new ModuleFederationPlugin({
       name: 'desktop_shell',
       remotes: {
@@ -62,6 +67,7 @@ export default defineConfig({
         settings: `settings@${MF_SETTINGS_URL}/mf-manifest.json`,
         terminal: `terminal@${MF_TERMINAL_URL}/mf-manifest.json`,
         ai_assistant: `ai_assistant@${MF_AI_ASSISTANT_URL}/mf-manifest.json`,
+        marketplace: `marketplace@${MF_MARKETPLACE_URL}/mf-manifest.json`,
       },
       shared: {
         react: { singleton: true, requiredVersion: '^19.0.0' },

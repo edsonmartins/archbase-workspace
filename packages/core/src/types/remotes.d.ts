@@ -12,3 +12,8 @@ declare module 'notes/App' {
   const Component: React.ComponentType<Record<string, unknown>>;
   export default Component;
 }
+
+declare module 'marketplace/App' {
+  const Component: React.ComponentType<Record<string, unknown>>;
+  export default Component;
+}

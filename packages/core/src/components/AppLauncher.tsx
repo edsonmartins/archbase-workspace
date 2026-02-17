@@ -1,6 +1,7 @@
 import { useState, useDeferredValue, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { AppManifest } from '@archbase/workspace-types';
 import { IS_MAC } from '../utils/parseKeyCombo';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface AppLauncherProps {
   visible: boolean;
@@ -31,6 +32,9 @@ export function AppLauncher({ visible, apps, onClose, onOpenApp }: AppLauncherPr
   const deferredQuery = useDeferredValue(query);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(overlayRef, visible);
 
   const results = useMemo(() => filterApps(apps, deferredQuery), [apps, deferredQuery]);
 
@@ -93,7 +97,11 @@ export function AppLauncher({ visible, apps, onClose, onOpenApp }: AppLauncherPr
 
   return (
     <div
+      ref={overlayRef}
       className="launcher-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Application Launcher"
       onPointerDown={(e) => {
         // Close on backdrop click
         if (e.target === e.currentTarget) onClose();
@@ -132,7 +140,7 @@ export function AppLauncher({ visible, apps, onClose, onOpenApp }: AppLauncherPr
                 onClose();
               }}
             >
-              {app.icon && <span className="launcher-result-icon">{app.icon}</span>}
+              {app.icon && <span className="launcher-result-icon" aria-hidden="true">{app.icon}</span>}
               <div className="launcher-result-text">
                 <span className="launcher-result-name">{app.displayName || app.name}</span>
                 {app.description && (

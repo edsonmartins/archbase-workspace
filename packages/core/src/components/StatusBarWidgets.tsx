@@ -16,8 +16,6 @@ export function StatusBarWidgets() {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        marginLeft: 'auto',
-        paddingRight: 8,
       }}
     >
       {widgets.map((w) => (

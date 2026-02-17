@@ -11,6 +11,7 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'jsdom',
+    setupFiles: ['fake-indexeddb/auto'],
     coverage: {
       provider: 'v8',
       enabled: false,

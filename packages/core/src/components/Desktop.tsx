@@ -12,6 +12,9 @@ import { SnapPreview } from './SnapPreview';
 import { ToastContainer } from './ToastContainer';
 import { CommandPalette } from './CommandPalette';
 import { PermissionPrompt } from './PermissionPrompt';
+import { CursorOverlay } from './CursorOverlay';
+import { PresencePanel } from './PresencePanel';
+import { AriaLiveRegion } from './AriaLiveRegion';
 
 export function Desktop() {
   useRegistryInit();
@@ -25,6 +28,7 @@ export function Desktop() {
 
   const [launcherVisible, setLauncherVisible] = useState(false);
   const [commandPaletteVisible, setCommandPaletteVisible] = useState(false);
+  const [presencePanelVisible, setPresencePanelVisible] = useState(false);
   const [snapZone, setSnapZone] = useState<SnapZone | null>(null);
 
   const openContextMenu = useContextMenuStore((s) => s.open);
@@ -194,6 +198,7 @@ export function Desktop() {
       onContextMenu={handleDesktopContextMenu}
     >
       <a href="#main-content" className="skip-link">Skip to main content</a>
+      <AriaLiveRegion />
       <div
         id="main-content"
         style={{
@@ -213,6 +218,7 @@ export function Desktop() {
             />
           ))}
         <SnapPreview zone={snapZone} />
+        <CursorOverlay />
         <ContextMenuOverlay />
       </div>
       <Taskbar apps={apps} onOpenApp={handleOpenApp} onOpenLauncher={toggleLauncher} />
@@ -225,6 +231,10 @@ export function Desktop() {
       <ToastContainer />
       <CommandPalette visible={commandPaletteVisible} onClose={closeCommandPalette} />
       <PermissionPrompt />
+      <PresencePanel
+        visible={presencePanelVisible}
+        onClose={() => setPresencePanelVisible(false)}
+      />
     </div>
   );
 }
@@ -433,10 +443,10 @@ function MenuPanel({ items, position, onClose, depth = 0, autoFocus = true }: Me
               }
             }}
           >
-            {item.icon && <span className="context-menu-icon">{item.icon}</span>}
+            {item.icon && <span className="context-menu-icon" aria-hidden="true">{item.icon}</span>}
             <span className="context-menu-label">{item.label}</span>
             {item.children && item.children.length > 0 ? (
-              <span className="context-menu-submenu-arrow">{'\u203A'}</span>
+              <span className="context-menu-submenu-arrow" aria-hidden="true">{'\u203A'}</span>
             ) : (
               item.shortcut && <span className="context-menu-shortcut">{item.shortcut}</span>
             )}

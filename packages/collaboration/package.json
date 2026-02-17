@@ -1,0 +1,29 @@
+{
+  "name": "@archbase/collaboration",
+  "version": "0.1.0",
+  "description": "Real-time collaboration engine for Archbase Workspace (Yjs + WebSocket/WebRTC)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'Collaboration is consumed via source'"
+  },
+  "dependencies": {
+    "@archbase/workspace-types": "workspace:*",
+    "@archbase/workspace-state": "workspace:*",
+    "yjs": "^13.6.0",
+    "lib0": "^0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}

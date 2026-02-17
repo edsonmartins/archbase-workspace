@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { useWindow, useWindowsStore, useContextMenuStore } from '@archbase/workspace-state';
+import { useWindow, useWindowsStore, useContextMenuStore, useCollaborationStore, useSharedWindows } from '@archbase/workspace-state';
 import type { ContextMenuItem } from '@archbase/workspace-types';
 import { LAYOUT } from '../constants';
+import { CollaborationBadge } from './CollaborationBadge';
 
 interface WindowHeaderProps {
   windowId: string;
@@ -72,6 +73,29 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
       });
     }
 
+    // Collaboration: Share Window
+    const collabState = useCollaborationStore.getState();
+    if (collabState.connected) {
+      const isShared = collabState.sharedWindows.has(windowId);
+      items.push({ id: 'sep-share', label: '', separator: true });
+      items.push({
+        id: 'share-window',
+        label: isShared ? 'Stop Sharing' : 'Share Window',
+        action: () => {
+          if (isShared) {
+            collabState.removeSharedWindow(windowId);
+          } else {
+            collabState.addSharedWindow({
+              windowId,
+              sharedBy: collabState.currentUser?.id ?? '',
+              mode: 'edit',
+              participants: [collabState.currentUser?.id ?? ''],
+            });
+          }
+        },
+      });
+    }
+
     if (window.flags.closable) {
       items.push({ id: 'sep-close', label: '', separator: true });
       items.push({
@@ -115,7 +139,7 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
             aria-label="Close window"
             title="Close"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         )}
         {window.flags.minimizable && (
@@ -125,7 +149,7 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
             aria-label="Minimize window"
             title="Minimize"
           >
-            −
+            <span aria-hidden="true">−</span>
           </button>
         )}
         {window.flags.maximizable && (
@@ -135,7 +159,7 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
             aria-label={window.state === 'maximized' ? 'Restore window' : 'Maximize window'}
             title={window.state === 'maximized' ? 'Restore' : 'Maximize'}
           >
-            {window.state === 'maximized' ? '⧉' : '□'}
+            <span aria-hidden="true">{window.state === 'maximized' ? '⧉' : '□'}</span>
           </button>
         )}
       </div>
@@ -151,12 +175,16 @@ export function WindowHeader({ windowId, isFocused, onDragPointerDown }: WindowH
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
         {window.metadata.icon && (
-          <span style={{ marginRight: 6 }}>{window.metadata.icon}</span>
+          <span aria-hidden="true">{window.metadata.icon}</span>
         )}
-        {window.title}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{window.title}</span>
+        <CollaborationBadge windowId={windowId} />
       </div>
     </div>
   );

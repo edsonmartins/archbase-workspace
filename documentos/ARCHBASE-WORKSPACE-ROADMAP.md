@@ -2,7 +2,7 @@
 
 **Version**: 1.0  
 **Last Updated**: 2026-02-16
-**Status**: Fase 6 In Progress (Phases 0-5 Complete, AI Assistant Implemented)
+**Status**: Fase 6 In Progress (Phases 0-5 Complete, AI Assistant + Theme System + PWA + Real-Time Collaboration Implemented)
 
 ---
 
@@ -508,17 +508,35 @@ Fase 6: Features Avançadas        [ongoing]    ░░░░░░░░░░�
 - [x] AI Chat CSS refactored to CSS variables with light theme overrides
 - [x] 15 testes (9 useThemeApplier + 6 useTheme logic)
 
-### 6.3 Backlog (Planned)
+### 6.3 PWA Features ✅ Complete
+- [x] Service Worker for offline support (vanilla Cache API, NetworkFirst/CacheFirst/StaleWhileRevalidate)
+- [x] IndexedDB storage via `idb` library (archbase-zustand + archbase-app-storage databases)
+- [x] StorageProvider abstraction (interface + LocalStorageProvider + IndexedDBProvider)
+- [x] Settings persistence via Zustand persist middleware with IDB backend
+- [x] Web App Manifest (standalone, landscape, PWA-ready)
+- [x] Offline indicator in Taskbar with `useSyncExternalStore`
+- [x] `useAsyncStorage` hook for remote apps
+- [x] 32 testes (10 asyncStorage + 11 storageProvider + 4 idbStorage + 3 onlineStatus + 4 swRegistration)
 
-### Collaboration
-- [ ] Multiplayer cursors (Figma-like)
-- [ ] Window sharing via WebRTC
-- [ ] Shared workspaces
+### 6.4 Real-Time Collaboration ✅ Complete
 
-### PWA Features
-- [ ] Service Worker para offline
-- [ ] IndexedDB/OPFS filesystem
-- [ ] Cloud storage connectors
+- [x] Collaboration types (`CollaborationUser`, `RoomInfo`, `CursorPosition`, `RemoteCursor`, `UserPresence`, `SharedWindowInfo`, `FollowState`, `CollaborationTransport`, `CollaborationSDK`)
+- [x] Collaboration engine package (`@archbase/collaboration`) with Yjs CRDT
+- [x] Transport abstraction: `AbstractTransport`, `WebSocketTransport`, `WebRTCTransport` (data channels)
+- [x] Services: `CursorService` (30fps broadcast), `PresenceService` (idle detection), `WindowSyncService` (Zustand ↔ Yjs bidirectional sync), `FollowService` (follow mode)
+- [x] `CollaborationClient` orchestrator with lifecycle management
+- [x] `useCollaborationStore` Zustand store (connected, users, cursors, shared windows, follow state)
+- [x] SDK integration: `createCollaborationService()`, `useCollaboration()` hook
+- [x] UI components: `CursorOverlay` (SVG cursors), `PresencePanel` (online users), `CollaborationBadge` (window sharing indicator)
+- [x] Reference server (`@archbase/collaboration-server`) with `ws` + Yjs sync + WebRTC signaling
+- [x] `'collaboration'` permission added to Permission union and ALL_PERMISSIONS
+- [x] Window header context menu: "Share Window" / "Stop Sharing"
+- [x] CSS variables for collaboration (dark + light themes)
+- [x] Exponential backoff reconnection (1s → 2s → 4s → ... → 30s max)
+- [x] Binary TLV encoding for efficient WebSocket messages
+- [x] 68 new tests (54 collaboration + 14 server)
+
+### 6.5 Backlog (Planned)
 
 ### Plugin Marketplace
 - [ ] Searchable catalog

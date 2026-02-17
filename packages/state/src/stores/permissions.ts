@@ -64,6 +64,7 @@ function getStorage(): Storage | null {
 export const ALL_PERMISSIONS: readonly Permission[] = [
   'notifications', 'storage', 'clipboard.read', 'clipboard.write',
   'filesystem.read', 'filesystem.write', 'network', 'camera', 'microphone',
+  'collaboration',
 ] as const;
 
 const VALID_PERMISSIONS: ReadonlySet<string> = new Set<Permission>(ALL_PERMISSIONS);

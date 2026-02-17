@@ -49,7 +49,7 @@
   --launcher-btn-bg-hover: rgba(255, 255, 255, 0.2);
   --app-btn-color: #e2e8f0;
   --app-btn-bg-hover: rgba(255, 255, 255, 0.1);
-  --remote-loading-color: #6b7280;
+  --remote-loading-color: #4b5563;
   --remote-error-color: #ef4444;
   --remote-error-bg-hover: rgba(239, 68, 68, 0.1);
 
@@ -88,8 +88,16 @@
   --context-menu-color: #e2e8f0;
   --context-menu-item-hover: rgba(255, 255, 255, 0.08);
   --context-menu-separator: #334155;
-  --context-menu-shortcut-color: #6b7280;
+  --context-menu-shortcut-color: #94a3b8;
   --context-menu-disabled-color: #475569;
+
+  /* Collaboration */
+  --collab-badge-bg: #3b82f6;
+  --collab-badge-text: #ffffff;
+  --collab-panel-bg: var(--taskbar-bg);
+  --collab-panel-border: var(--taskbar-border);
+  --collab-panel-width: 240px;
+  --collab-dot-size: 8px;
 }
 
 *,
@@ -856,6 +864,31 @@ html, body, #root {
   outline: 2px solid var(--focus-ring);
   font-size: 14px;
   text-decoration: none;
+}
+
+/* ============================================================
+   Offline Indicator
+   ============================================================ */
+
+.offline-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 500;
+  user-select: none;
+}
+
+.offline-indicator-icon {
+  font-size: 12px;
+}
+
+.offline-indicator-text {
+  line-height: 1;
 }
 
 /* ── Global Focus Outline ────────────────────── */

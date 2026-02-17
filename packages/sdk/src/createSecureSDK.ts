@@ -94,6 +94,57 @@ function wrapStorage(
   };
 }
 
+function wrapCollaboration(
+  inner: WorkspaceSDK['collaboration'],
+  appId: string,
+  declared: Set<Permission>,
+): WorkspaceSDK['collaboration'] {
+  const check = () => checkAndEnforce(appId, 'collaboration', declared);
+  const noop = () => {};
+
+  return {
+    get isConnected() { return check() ? inner.isConnected : false; },
+    get currentRoom() { return check() ? inner.currentRoom : null; },
+    get currentUser() { return check() ? inner.currentUser : null; },
+
+    async join(roomId) {
+      if (!check()) return;
+      return inner.join(roomId);
+    },
+    leave() {
+      if (!check()) return;
+      inner.leave();
+    },
+    getUsers() { return check() ? inner.getUsers() : []; },
+    setStatus(status) {
+      if (!check()) return;
+      inner.setStatus(status);
+    },
+    shareWindow(windowId, mode?) {
+      if (!check()) return;
+      inner.shareWindow(windowId, mode);
+    },
+    unshareWindow(windowId) {
+      if (!check()) return;
+      inner.unshareWindow(windowId);
+    },
+    getSharedWindows() { return check() ? inner.getSharedWindows() : []; },
+    followUser(userId) {
+      if (!check()) return;
+      inner.followUser(userId);
+    },
+    unfollowUser() {
+      if (!check()) return;
+      inner.unfollowUser();
+    },
+    getFollowState() { return { followingUserId: null }; },
+    onUserJoined(handler) { return check() ? inner.onUserJoined(handler) : noop; },
+    onUserLeft(handler) { return check() ? inner.onUserLeft(handler) : noop; },
+    onCursorMove(handler) { return check() ? inner.onCursorMove(handler) : noop; },
+    onWindowShared(handler) { return check() ? inner.onWindowShared(handler) : noop; },
+  };
+}
+
 // ============================================================
 // Permissions Service
 // ============================================================
@@ -159,10 +210,7 @@ function createPermissionsService(
  * **Currently enforced permissions:**
  * - `'notifications'` — gates `notifications.*` methods
  * - `'storage'` — gates `storage.*` methods
- *
- * Other Permission types (clipboard, filesystem, network, camera, microphone) exist
- * for forward-compatibility but have no corresponding SDK services yet.
- * They can be declared in manifests and requested via `sdk.permissions.request()`.
+ * - `'collaboration'` — gates `collaboration.*` methods
  */
 export function createSecureSDK(
   appId: string,
@@ -183,5 +231,6 @@ export function createSecureSDK(
     notifications: wrapNotifications(innerSDK.notifications, appId, declaredPermissions),
     storage: wrapStorage(innerSDK.storage, appId, declaredPermissions),
     permissions: createPermissionsService(appId, manifest, declaredPermissions),
+    collaboration: wrapCollaboration(innerSDK.collaboration, appId, declaredPermissions),
   };
 }

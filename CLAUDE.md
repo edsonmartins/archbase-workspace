@@ -9,7 +9,7 @@ A multi-app workspace that unifies web systems from different frameworks (React,
 - **UI**: React 19
 - **State**: Zustand 5 (global) + Jotai (per-app)
 - **Types**: TypeScript 5.7+ strict mode
-- **Tests**: Vitest (600+ tests) + Playwright (E2E)
+- **Tests**: Vitest (714+ tests) + Playwright (E2E)
 - **Styling**: CSS custom properties with theme system (no CSS-in-JS, no Tailwind)
 
 ## Project Structure
@@ -21,6 +21,8 @@ packages/
   sdk/            - Workspace SDK for remote apps (hooks, bridges, context menus)
   create-app/     - CLI scaffolding tool (create, dev, build, publish)
   ai-assistant/   - AI service library (OpenAI integration, tool calling)
+  collaboration/  - Real-time collaboration engine (Yjs CRDT, WebSocket/WebRTC)
+  collaboration-server/ - Reference WebSocket server for collaboration (port 4000)
 apps/
   hello-world/    - Example remote MF (port 3001)
   calculator/     - Calculator with Jotai (port 3002)
@@ -55,6 +57,7 @@ documentos/       - ADRs, RFCs, concept docs, roadmap
 - `useSettingsStore` - Workspace settings
 - `useMenuRegistryStore` - Application and context menu items
 - `useWidgetRegistryStore` - Status bar widgets
+- `useCollaborationStore` - Real-time collaboration state (users, cursors, shared windows)
 
 ## Architecture Decisions
 - See `documentos/ARCHBASE-ADR-*.md` for ADRs
@@ -73,3 +76,24 @@ documentos/       - ADRs, RFCs, concept docs, roadmap
 - Theme system: `useThemeApplier` (core, applies `data-theme` to `<html>`), `useTheme` (SDK hook for remote apps)
 - Theme modes: `dark` (default), `light`, `auto` (follows OS via `prefers-color-scheme`)
 - Theme setting key: `workspace.theme` in Settings store
+
+## PWA & Storage
+- Service Worker: `packages/core/public/sw.js` (vanilla Cache API, no Workbox)
+- SW Registration: skipped on localhost unless `archbase:sw:enable-dev` in localStorage
+- IndexedDB: `idb` library, 2 separate databases (`archbase-zustand` for state, `archbase-app-storage` for SDK)
+- Settings persist via Zustand `persist` middleware with custom IDB PersistStorage
+- StorageProvider: `StorageProvider` interface + `LocalStorageProvider` + `IndexedDBProvider`
+- Async hooks: `useAsyncStorage(appId, key, defaultValue)` returns `[value, setValue, isLoading]`
+- MF remotes intentionally NOT cached by SW (avoids stale versions)
+
+## Real-Time Collaboration
+- Engine: `@archbase/collaboration` with Yjs CRDT for state sync
+- Transports: `WebSocketTransport` (default, server-mediated), `WebRTCTransport` (P2P data channels)
+- Client: `CollaborationClient` orchestrates cursor/presence/window sync/follow services
+- Server: `@archbase/collaboration-server` (port 4000), `ws` library + Yjs sync protocol
+- Store: `useCollaborationStore` (connected, users, cursors, sharedWindows, followingUserId)
+- SDK: `useCollaboration()` hook, `createCollaborationService()` for remote apps
+- UI: `CursorOverlay` (SVG cursors), `PresencePanel` (online users), `CollaborationBadge` (window header)
+- Identity: Local-only (`CollaborationUser { id, displayName, color }`), no auth required
+- Cursor palette: 8 colors (`CURSOR_PALETTE`), assigned on room entry
+- Encoding: Binary TLV (`encodeMessage`/`decodeMessage`) for efficient WebSocket messages

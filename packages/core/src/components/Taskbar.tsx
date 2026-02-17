@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useAllWindows, useWindowsStore, useFocusedWindowId, useContextMenuStore } from '@archbase/workspace-state';
 import type { AppManifest, ContextMenuItem } from '@archbase/workspace-types';
 import { StatusBarWidgets } from './StatusBarWidgets';
+import { OfflineIndicator } from './OfflineIndicator';
 
 interface TaskbarProps {
   apps: AppManifest[];
@@ -146,7 +147,10 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
         </button>
       ))}
 
-      <StatusBarWidgets />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto', paddingRight: 8 }}>
+        <OfflineIndicator />
+        <StatusBarWidgets />
+      </div>
     </nav>
   );
 }

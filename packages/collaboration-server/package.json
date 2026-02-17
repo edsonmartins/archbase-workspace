@@ -1,0 +1,25 @@
+{
+  "name": "@archbase/collaboration-server",
+  "version": "0.1.0",
+  "description": "Reference WebSocket server for Archbase Workspace real-time collaboration",
+  "type": "module",
+  "main": "./src/server.ts",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'Server is run via tsx'"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "yjs": "^13.6.0",
+    "lib0": "^0.2.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}

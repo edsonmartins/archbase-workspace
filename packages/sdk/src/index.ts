@@ -28,5 +28,23 @@ export type {
   BridgeMessage,
 } from './bridge/types';
 
+// Async Storage (IndexedDB)
+export { createAsyncStorageService, IndexedDBProvider } from './services/asyncStorageService';
+export { useAsyncStorage } from './hooks/useAsyncStorage';
+
+// Storage Provider Abstraction
+export {
+  registerStorageProvider,
+  setDefaultProvider,
+  getStorageProvider,
+  listStorageProviders,
+  LocalStorageProvider,
+} from './services/storageProviderRegistry';
+export type { StorageProvider } from './services/storageProviderRegistry';
+
+// Collaboration
+export { useCollaboration } from './hooks/useCollaboration';
+export { createCollaborationService } from './services/collaborationService';
+
 // Re-export types for convenience
 export type { WorkspaceSDK } from '@archbase/workspace-types';

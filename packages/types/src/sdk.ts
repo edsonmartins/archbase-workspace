@@ -1,4 +1,4 @@
-import type { CommandHandler, ContextMenuItem, Permission, PermissionGrant, SettingValue, WindowState } from './index';
+import type { CollaborationSDK, CommandHandler, ContextMenuItem, Permission, PermissionGrant, SettingValue, WindowState } from './index';
 
 /** SDK instance scoped to a specific app and window */
 export interface WorkspaceSDK {
@@ -58,4 +58,7 @@ export interface WorkspaceSDK {
     request(permission: Permission): Promise<boolean>;
     list(): Array<{ permission: Permission; grant: PermissionGrant }>;
   };
+
+  /** Real-time collaboration */
+  readonly collaboration: CollaborationSDK;
 }

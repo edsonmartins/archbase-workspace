@@ -76,6 +76,37 @@ export {
 
 export type { PendingPrompt } from './stores/permissions';
 
+export {
+  useCollaborationStore,
+  useIsCollaborating,
+  useCollaborationRoomId,
+  useCollaborationUser,
+  useCollaborationUsers,
+  useRemoteCursors,
+  useSharedWindows,
+  useFollowingUser,
+  onUserJoined,
+  onUserLeft,
+} from './stores/collaboration';
+
+export {
+  useMarketplaceStore,
+  useInstalledPlugins,
+  useMarketplaceRegistry,
+  useMarketplaceCategories,
+  useMarketplaceUpdates,
+  useMarketplaceStatus,
+} from './stores/marketplace';
+
+export {
+  filterPlugins,
+  compareSemver,
+  detectUpdates,
+  getCategories,
+} from './services/marketplaceService';
+
+export { idbStateStorage } from './middleware/idbStorage';
+
 export { processContributions, removeContributions } from './services/contributionProcessor';
 
 export { activationService } from './services/activationService';

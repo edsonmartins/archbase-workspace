@@ -42,7 +42,7 @@ function Toast({ notification, isExiting, onStartExit }: ToastProps) {
       className={`toast toast-${notification.type}${isExiting ? ' toast-exiting' : ''}`}
       role="alert"
     >
-      <span className="toast-icon">{TYPE_ICONS[notification.type]}</span>
+      <span className="toast-icon" aria-hidden="true">{TYPE_ICONS[notification.type]}</span>
       <div className="toast-content">
         <span className="toast-title">{notification.title}</span>
         {notification.message && (
@@ -55,7 +55,7 @@ function Toast({ notification, isExiting, onStartExit }: ToastProps) {
           onClick={handleDismiss}
           aria-label="Dismiss notification"
         >
-          {'\u2715'}
+          <span aria-hidden="true">{'\u2715'}</span>
         </button>
       )}
     </div>

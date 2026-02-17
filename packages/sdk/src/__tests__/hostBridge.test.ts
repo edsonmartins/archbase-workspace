@@ -47,6 +47,25 @@ function createMockSDK(): WorkspaceSDK {
       request: vi.fn(async () => true),
       list: vi.fn(() => []),
     },
+    collaboration: {
+      get isConnected() { return false; },
+      get currentRoom() { return null; },
+      get currentUser() { return null; },
+      async join() {},
+      leave() {},
+      getUsers() { return []; },
+      setStatus() {},
+      shareWindow() {},
+      unshareWindow() {},
+      getSharedWindows() { return []; },
+      followUser() {},
+      unfollowUser() {},
+      getFollowState() { return { followingUserId: null }; },
+      onUserJoined() { return () => {}; },
+      onUserLeft() { return () => {}; },
+      onCursorMove() { return () => {}; },
+      onWindowShared() { return () => {}; },
+    },
   };
 }
 

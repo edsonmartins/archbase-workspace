@@ -2,22 +2,28 @@
   "name": "@archbase/workspace-state",
   "version": "0.1.0",
   "description": "State management for Archbase Workspace (Zustand stores)",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
+  "files": ["dist", "README.md"],
+  "license": "MIT",
+  "sideEffects": false,
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "@archbase/workspace-types": "workspace:*",
+    "idb": "^8.0.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.0"
   },
@@ -26,9 +32,10 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "fake-indexeddb": "^6.2.5",
     "react": "^19.0.0",
     "typescript": "^5.7.0",
-    "@vitest/coverage-v8": "^3.0.0",
     "vitest": "^3.0.0"
   }
 }

@@ -254,5 +254,25 @@ export function createIframeBridgeSDK(appId: string, windowId: string, options?:
         return [];
       },
     },
+
+    collaboration: {
+      get isConnected() { return false; },
+      get currentRoom() { return null; },
+      get currentUser() { return null; },
+      async join() { /* no-op in sandboxed iframe */ },
+      leave() {},
+      getUsers() { return []; },
+      setStatus() {},
+      shareWindow() {},
+      unshareWindow() {},
+      getSharedWindows() { return []; },
+      followUser() {},
+      unfollowUser() {},
+      getFollowState() { return { followingUserId: null }; },
+      onUserJoined() { return () => {}; },
+      onUserLeft() { return () => {}; },
+      onCursorMove() { return () => {}; },
+      onWindowShared() { return () => {}; },
+    },
   };
 }

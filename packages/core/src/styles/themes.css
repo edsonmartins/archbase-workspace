@@ -86,4 +86,10 @@
   --btn-primary-text: #fff;
   --btn-secondary-bg: #e5e7eb;
   --btn-secondary-text: #374151;
+
+  /* Collaboration */
+  --collab-badge-bg: #3b82f6;
+  --collab-badge-text: #ffffff;
+  --collab-panel-bg: #ffffff;
+  --collab-panel-border: #e5e7eb;
 }

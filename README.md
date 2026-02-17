@@ -50,7 +50,7 @@ ARCHBASE ECOSYSTEM
 | State (per-app) | Jotai |
 | Types | TypeScript 5.7+ strict mode |
 | Validation | Zod v4 (manifest schemas) |
-| Tests | Vitest (605+ tests passing) |
+| Tests | Vitest (714+ tests passing) |
 | E2E | Playwright |
 | Styling | CSS Variables (theming via custom properties) |
 
@@ -66,7 +66,9 @@ archbase-workspace/
 │   ├── state/          # Zustand stores (windows, registry, shortcuts, notifications, contextMenu, permissions, settings, commands)
 │   ├── sdk/            # Workspace SDK for remote apps (hooks, bridges, context menus)
 │   ├── create-app/     # CLI scaffolding tool (create, dev, build, publish)
-│   └── ai-assistant/   # AI service library (OpenAI integration, tool calling)
+│   ├── ai-assistant/   # AI service library (OpenAI integration, tool calling)
+│   ├── collaboration/  # Real-time collaboration engine (Yjs CRDT, WebSocket/WebRTC)
+│   └── collaboration-server/  # Reference WebSocket server for collaboration (port 4000)
 ├── apps/
 │   ├── hello-world/    # Example remote app (port 3001)
 │   ├── calculator/     # Calculator with Jotai state (port 3002)
@@ -103,6 +105,12 @@ Utilities: `parseKeyCombo`, `computeSnapZones`.
 **`@archbase/ai-assistant`** — AI service library
 `AIAssistantService` (OpenAI integration with function calling), 15 workspace tools (open/close/focus/tile windows, execute commands, notifications, settings), `buildSystemPrompt()` (context builder), `executeTool()` / `executeToolCalls()` (tool executor).
 
+**`@archbase/collaboration`** — Real-time collaboration engine
+`CollaborationClient` (orchestrator), `WebSocketTransport` / `WebRTCTransport` (pluggable transports), `CursorService` (30fps cursor broadcast), `PresenceService` (idle detection), `WindowSyncService` (Zustand ↔ Yjs bidirectional sync), `FollowService` (follow mode). Binary TLV encoding, exponential backoff reconnection.
+
+**`@archbase/collaboration-server`** — Reference WebSocket server
+Room management with Yjs document sync, WebRTC signaling (SDP offer/answer + ICE candidates), cursor color assignment, graceful shutdown.
+
 ---
 
 ## Features
@@ -130,11 +138,30 @@ Utilities: `parseKeyCombo`, `computeSnapZones`.
 - **Toast Notifications** — Info, success, warning, error toasts with auto-dismiss
 - **Taskbar** — Running apps, launcher button, active window indicator
 
+### Real-Time Collaboration
+- **Multiplayer cursors** — Figma-like SVG cursor overlay with user name labels at 30fps
+- **Yjs CRDT sync** — Conflict-free window state synchronization via `Y.Map`
+- **Pluggable transports** — WebSocket (server-mediated) or WebRTC data channels (P2P)
+- **Presence awareness** — Online users panel with idle/away detection (60s/5min)
+- **Window sharing** — Share individual windows with other users (view or edit mode)
+- **Follow mode** — Follow another user's cursor and window focus
+- **Reference server** — Node.js WebSocket server with Yjs sync and WebRTC signaling
+- **Exponential backoff** — Auto-reconnection (1s → 30s max)
+
 ### Theming
 - **Dark / Light / Auto** modes via `workspace.theme` setting
 - ~80 CSS custom properties for all UI colors
 - Auto mode follows OS preference (`prefers-color-scheme`) in real-time
 - SDK `useTheme()` hook for remote apps to read resolved theme
+
+### PWA & Offline
+- **Service Worker** with Cache API (NetworkFirst for HTML, CacheFirst for images/fonts, StaleWhileRevalidate for JS/CSS)
+- **IndexedDB** storage via `idb` library for data beyond localStorage limits
+- **StorageProvider** abstraction with pluggable backends (localStorage, IndexedDB, cloud connectors)
+- **Settings persistence** via Zustand persist middleware with IDB backend
+- **Offline indicator** in Taskbar with real-time online/offline detection
+- **Web App Manifest** for standalone installable PWA
+- Cross-origin MF remotes intentionally NOT cached (avoids stale versions)
 
 ### Accessibility
 - ARIA roles on all interactive elements (`dialog`, `separator`, `menu`, `combobox`)
@@ -176,7 +203,7 @@ This starts:
 # Build all packages
 pnpm build
 
-# Run all tests (605+ tests)
+# Run all tests (637+ tests)
 pnpm test
 
 # Run tests with coverage report
@@ -241,7 +268,7 @@ See `documentos/ARCHBASE-ADR-*.md` for full decision records.
 | Phase 3 | Desktop Environment — launcher, snap, shortcuts, context menus, toasts | Complete |
 | Phase 4 | Plugin System & SDK — activation events, CLI, SDK package | Complete |
 | Phase 5 | Isolation & Security — Shadow DOM, permissions, sandboxed iframe | Complete |
-| Phase 6 | Advanced Features — AI assistant, themes, i18n, plugins marketplace | In Progress |
+| Phase 6 | Advanced Features — AI assistant, themes, PWA, real-time collaboration | In Progress |
 
 See `documentos/ARCHBASE-WORKSPACE-ROADMAP.md` for the full roadmap.
 

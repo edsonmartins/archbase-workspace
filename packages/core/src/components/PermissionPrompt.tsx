@@ -12,6 +12,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   network: 'Access Network',
   camera: 'Use Camera',
   microphone: 'Use Microphone',
+  collaboration: 'Real-Time Collaboration',
 };
 
 const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
@@ -24,6 +25,7 @@ const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   network: 'This app wants to make network requests.',
   camera: 'This app wants to access your camera.',
   microphone: 'This app wants to access your microphone.',
+  collaboration: 'This app wants to participate in real-time collaboration sessions.',
 };
 
 export function PermissionPrompt() {

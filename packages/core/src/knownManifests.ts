@@ -16,6 +16,7 @@ const MF_FILE_EXPLORER_URL = process.env.MF_FILE_EXPLORER_URL || 'http://localho
 const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
 const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
+const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
 
 export const KNOWN_MANIFESTS: AppManifest[] = [
   {
@@ -290,6 +291,40 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
           type: 'string',
           default: 'gpt-4o',
           description: 'OpenAI model to use',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.marketplace',
+    name: 'marketplace',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_MARKETPLACE_URL}/mf-manifest.json`,
+    displayName: 'Marketplace',
+    description: 'Browse, install, and manage workspace plugins',
+    icon: '🏪',
+    window: {
+      defaultWidth: 900,
+      defaultHeight: 650,
+      minWidth: 600,
+      minHeight: 400,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: ['storage', 'notifications'],
+    keywords: ['marketplace', 'plugins', 'extensions'],
+    activationEvents: ['onCommand:marketplace.open'],
+    contributes: {
+      commands: [
+        {
+          id: 'marketplace.open',
+          title: 'Open Marketplace',
+          category: 'Marketplace',
+          icon: '🏪',
         },
       ],
     },

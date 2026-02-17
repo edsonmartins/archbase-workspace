@@ -5,6 +5,7 @@ import { createCommandService } from './services/commandService';
 import { createNotificationService } from './services/notificationService';
 import { createSettingsService } from './services/settingsService';
 import { createStorageService } from './services/storageService';
+import { createCollaborationService } from './services/collaborationService';
 
 /**
  * Create a WorkspaceSDK instance scoped to a specific app and window.
@@ -41,5 +42,7 @@ export function createWorkspaceSDK(appId: string, windowId: string): WorkspaceSD
         return [];
       },
     },
+
+    collaboration: createCollaborationService(),
   };
 }
