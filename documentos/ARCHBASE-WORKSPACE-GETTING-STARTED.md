@@ -315,7 +315,7 @@ const handleContextMenu = (e: React.MouseEvent) => {
   sdk.contextMenu.show({ x: e.clientX, y: e.clientY }, [
     { id: 'copy', label: 'Copy', action: () => { /* ... */ } },
     { id: 'paste', label: 'Paste', action: () => { /* ... */ } },
-    { type: 'separator' },
+    { id: 'sep-1', label: '', separator: true },
     { id: 'delete', label: 'Delete', action: () => { /* ... */ } },
   ]);
 };

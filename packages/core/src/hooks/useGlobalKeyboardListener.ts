@@ -152,6 +152,7 @@ export function useGlobalKeyboardListener({ onToggleLauncher, onToggleCommandPal
       const shortcuts = useShortcutsStore.getState().getAllShortcuts();
       for (const shortcut of shortcuts) {
         if (!shortcut.enabled) continue;
+        if (shortcut.scope && shortcut.scope !== 'global') continue;
         if (matchesKeyCombo(e, shortcut.combo)) {
           e.preventDefault();
           e.stopPropagation();

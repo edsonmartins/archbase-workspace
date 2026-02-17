@@ -13,4 +13,6 @@ export interface WorkspaceNotification {
   duration: number;
   createdAt: number;
   dismissible: boolean;
+  /** Timestamp when the notification was dismissed. Set when moved to history. */
+  dismissedAt?: number;
 }

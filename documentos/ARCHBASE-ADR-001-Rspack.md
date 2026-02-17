@@ -76,7 +76,7 @@ Analisamos 4 opções principais:
 ### Configuração Base
 
 ```js
-// packages/desktop/rspack.config.js
+// packages/core/rspack.config.ts
 const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
 
 module.exports = {
@@ -84,9 +84,9 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'desktop_shell',
       shared: {
-        react: { singleton: true, requiredVersion: '^18.3.0' },
-        'react-dom': { singleton: true, requiredVersion: '^18.3.0' },
-        zustand: { singleton: true, requiredVersion: '^4.5.0' },
+        react: { singleton: true, requiredVersion: '^19.0.0' },
+        'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+        zustand: { singleton: true, requiredVersion: '^5.0.0' },
         '@archbase/workspace-sdk': { singleton: true }
       },
       // Types auto-gerados em .mf/

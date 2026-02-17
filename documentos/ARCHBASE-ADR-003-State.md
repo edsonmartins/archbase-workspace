@@ -347,10 +347,10 @@ function CalculatorUI() {
 
 4. **Module Federation friendly**
    ```typescript
-   // No rspack.config.js (host)
+   // No rspack.config.ts (host)
    shared: {
-     'zustand': { singleton: true, requiredVersion: '^4.5.0' },
-     'jotai': { singleton: true, requiredVersion: '^2.6.0' }
+     'zustand': { singleton: true, requiredVersion: '^5.0.0' },
+     'jotai': { singleton: true, requiredVersion: '^2.12.0' }
    }
    ```
 
@@ -465,16 +465,16 @@ it('calculates correctly', () => {
 ### Shared no Host
 
 ```typescript
-// packages/desktop/rspack.config.js
+// packages/core/rspack.config.ts
 shared: {
   'zustand': {
     singleton: true,      // CRÍTICO
-    requiredVersion: '^4.5.0',
+    requiredVersion: '^5.0.0',
     strictVersion: true   // Evita version mismatch
   },
   'jotai': {
     singleton: true,
-    requiredVersion: '^2.6.0'
+    requiredVersion: '^2.12.0'
   },
   '@archbase/workspace-state': {    // Package com stores Zustand
     singleton: true

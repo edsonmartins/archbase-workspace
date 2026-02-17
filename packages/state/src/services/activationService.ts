@@ -10,6 +10,10 @@ const pendingActivations = new Map<string, AppManifest[]>();
 const disposers: Unsubscribe[] = [];
 let initialized = false;
 
+// Lifecycle callback handlers
+let preloadHandler: ((manifest: AppManifest) => void) | null = null;
+let autoStartHandler: ((manifest: AppManifest) => void) | null = null;
+
 // ============================================================
 // Helpers
 // ============================================================
@@ -46,6 +50,11 @@ function activateApp(manifest: AppManifest): void {
   activatedApps.add(manifest.id);
   // Note: contributions are already processed by the registry at registration time.
   // ActivationService only tracks activation state for lazy-loading of MF remotes.
+
+  // Trigger preload for apps that request it
+  if (manifest.lifecycle?.preload && preloadHandler) {
+    preloadHandler(manifest);
+  }
 }
 
 function activateForEvent(event: ActivationEvent): void {
@@ -56,6 +65,18 @@ function activateForEvent(event: ActivationEvent): void {
   }
 }
 
+
+// ============================================================
+// Lifecycle Handler Registration
+// ============================================================
+
+export function setPreloadHandler(fn: (m: AppManifest) => void): void {
+  preloadHandler = fn;
+}
+
+export function setAutoStartHandler(fn: (m: AppManifest) => void): void {
+  autoStartHandler = fn;
+}
 
 // ============================================================
 // Public API
@@ -75,6 +96,14 @@ export const activationService = {
 
     // Fire onDesktopReady
     activateForEvent('onDesktopReady');
+
+    // AutoStart apps that were activated via onDesktopReady
+    const allApps = useAppRegistryStore.getState().apps;
+    allApps.forEach((manifest) => {
+      if (manifest.lifecycle?.autoStart && activatedApps.has(manifest.id) && autoStartHandler) {
+        autoStartHandler(manifest);
+      }
+    });
 
     // Subscribe to new app registrations
     const unsub = onAppRegistered((app) => {
@@ -125,5 +154,7 @@ export const activationService = {
     activatedApps.clear();
     pendingActivations.clear();
     initialized = false;
+    preloadHandler = null;
+    autoStartHandler = null;
   },
 };

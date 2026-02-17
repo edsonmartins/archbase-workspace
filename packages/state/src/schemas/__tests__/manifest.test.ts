@@ -339,4 +339,28 @@ describe('Manifest Zod Schema', () => {
       }
     });
   });
+
+  describe('description max length', () => {
+    it('rejects description longer than 500 characters', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        description: 'x'.repeat(501),
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts description at exactly 500 characters', () => {
+      const result = appManifestSchema.safeParse({
+        ...MINIMAL_MANIFEST,
+        description: 'x'.repeat(500),
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts manifest without description', () => {
+      const { description: _, ...noDesc } = FULL_MANIFEST;
+      const result = appManifestSchema.safeParse(noDesc);
+      expect(result.success).toBe(true);
+    });
+  });
 });

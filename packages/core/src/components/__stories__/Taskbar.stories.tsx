@@ -11,7 +11,7 @@ function mockWindow(overrides: Partial<WorkspaceWindow> & { id: string; appId: s
     constraints: { minWidth: 200, minHeight: 150, maxWidth: Infinity, maxHeight: Infinity },
     zIndex: 0,
     state: 'normal',
-    flags: { resizable: true, maximizable: true, minimizable: true, closable: true },
+    flags: { resizable: true, maximizable: true, minimizable: true, closable: true, alwaysOnTop: false },
     props: {},
     metadata: { createdAt: Date.now(), focusedAt: Date.now() },
     ...overrides,

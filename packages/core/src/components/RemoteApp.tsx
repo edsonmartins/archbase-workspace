@@ -5,6 +5,7 @@ import { createSecureSDK, WorkspaceProvider } from '@archbase/workspace-sdk';
 import type { AppManifest } from '@archbase/workspace-types';
 import { ShadowContainer } from './ShadowContainer';
 import { SandboxedApp } from './SandboxedApp';
+import { WasmApp } from './WasmApp';
 
 interface RemoteAppProps {
   appId: string;
@@ -79,6 +80,7 @@ export function RemoteApp({ appId, windowId }: RemoteAppProps) {
   const manifest = registryQueries.getApp(appId);
   const mfName = manifest?.name ?? appId;
   const displayName = manifest?.displayName ?? mfName;
+  const isWasm = !!manifest?.wasm;
   const isSandboxed = !!manifest?.sandbox;
 
   // Always use createSecureSDK — even without a manifest, use a deny-all fallback
@@ -101,6 +103,11 @@ export function RemoteApp({ appId, windowId }: RemoteAppProps) {
     clearRemoteCache(mfName);
     setRetryCount((c) => c + 1);
   }, [mfName]);
+
+  // WASM mode: WebAssembly rendering path
+  if (isWasm && manifest) {
+    return <WasmApp appId={appId} windowId={windowId} manifest={manifest} />;
+  }
 
   // Sandboxed iframe mode: completely different rendering path
   if (isSandboxed && manifest) {

@@ -19,6 +19,9 @@
    - [useCommand](#usecommandcommandid-handler)
    - [useSettingValue](#usesettingvaluekey)
    - [useStorage](#usestoragekey-defaultvalue)
+   - [useTheme](#usetheme)
+   - [useAsyncStorage](#useasyncstorageappid-key-defaultvalue)
+   - [useCollaboration](#usecollaboration)
 5. [SDK Services](#5-sdk-services)
    - [sdk.windows](#sdkwindows)
    - [sdk.commands](#sdkcommands)
@@ -27,6 +30,7 @@
    - [sdk.storage](#sdkstorage)
    - [sdk.contextMenu](#sdkcontextmenu)
    - [sdk.permissions](#sdkpermissions)
+   - [sdk.collaboration](#sdkcollaboration)
 6. [Bridge APIs](#6-bridge-apis)
    - [createHostBridge](#createhostbridgeoptions)
    - [createIframeBridgeSDK](#createiframebridgesdkappid-windowid-options)
@@ -461,9 +465,126 @@ function Counter() {
 
 ---
 
+### `useTheme()`
+
+Returns current theme information and a setter for changing the theme.
+
+```tsx
+const { theme, setTheme, isDark } = useTheme();
+```
+
+| Property   | Type                                    | Description                              |
+|------------|-----------------------------------------|------------------------------------------|
+| `theme`    | `'dark' \| 'light' \| 'auto'`          | Current theme mode                       |
+| `setTheme` | `(theme: 'dark' \| 'light' \| 'auto') => void` | Change theme                    |
+| `isDark`   | `boolean`                               | Whether current effective theme is dark  |
+
+**Reactive behavior:** Re-renders the component when the theme changes. When `theme` is `'auto'`, the `isDark` property reflects the operating system's `prefers-color-scheme` media query.
+
+**Example:**
+
+```tsx
+import { useTheme } from '@archbase/workspace-sdk';
+
+function ThemeSwitch() {
+  const { theme, setTheme, isDark } = useTheme();
+
+  return (
+    <button onClick={() => setTheme(isDark ? 'light' : 'dark')}>
+      Switch to {isDark ? 'Light' : 'Dark'} Mode
+    </button>
+  );
+}
+```
+
+---
+
+### `useAsyncStorage(appId, key, defaultValue)`
+
+Persistent per-app storage backed by IndexedDB. Returns a tuple similar to `useState` with an additional loading indicator.
+
+```tsx
+const [value, setValue, isLoading] = useAsyncStorage('my-app', 'settings', defaultSettings);
+```
+
+| Return      | Type                     | Description                              |
+|-------------|--------------------------|------------------------------------------|
+| `value`     | `T`                      | Current stored value (or default)        |
+| `setValue`  | `(value: T) => Promise<void>` | Persist a new value                |
+| `isLoading` | `boolean`               | Whether the initial load is in progress  |
+
+**Behavior:**
+
+- On mount, asynchronously loads the stored value from IndexedDB. While loading, `value` equals `defaultValue` and `isLoading` is `true`.
+- Once loaded, `value` updates to the stored value and `isLoading` becomes `false`.
+- Calling `setValue` writes to both local state (immediate re-render) and IndexedDB (persistent).
+
+**Example:**
+
+```tsx
+import { useAsyncStorage } from '@archbase/workspace-sdk';
+
+function UserPreferences() {
+  const [prefs, setPrefs, isLoading] = useAsyncStorage('my-app', 'prefs', { fontSize: 14 });
+
+  if (isLoading) return <p>Loading preferences...</p>;
+
+  return (
+    <div>
+      <label>Font Size: {prefs.fontSize}</label>
+      <button onClick={() => setPrefs({ ...prefs, fontSize: prefs.fontSize + 1 })}>
+        Increase
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+### `useCollaboration()`
+
+Real-time collaboration state hook. Returns the current collaboration session state from the collaboration store.
+
+```tsx
+const { isConnected, roomId, currentUser, users, cursors, sharedWindows, followingUserId } = useCollaboration();
+```
+
+| Property          | Type                        | Description                          |
+|-------------------|-----------------------------|--------------------------------------|
+| `isConnected`     | `boolean`                   | Whether a collaboration session is active |
+| `roomId`          | `string \| null`            | Current room ID                      |
+| `currentUser`     | `CollaborationUser \| null` | Local user info                      |
+| `users`           | `UserPresence[]`            | Online users                         |
+| `cursors`         | `RemoteCursor[]`            | Remote cursor positions              |
+| `sharedWindows`   | `SharedWindowInfo[]`        | Windows being shared                 |
+| `followingUserId` | `string \| null`            | User being followed                  |
+
+**Reactive behavior:** Re-renders the component when any collaboration state changes (users joining/leaving, cursor movements, shared windows changing, etc.).
+
+**Example:**
+
+```tsx
+import { useCollaboration } from '@archbase/workspace-sdk';
+
+function CollaborationStatus() {
+  const { isConnected, users, roomId } = useCollaboration();
+
+  if (!isConnected) return <span>Offline</span>;
+
+  return (
+    <span>
+      Room: {roomId} — {users.length} user(s) online
+    </span>
+  );
+}
+```
+
+---
+
 ## 5. SDK Services
 
-The `WorkspaceSDK` interface exposes seven service namespaces. Each is documented below with its full method signatures and behavior.
+The `WorkspaceSDK` interface exposes eight service namespaces. Each is documented below with its full method signatures and behavior.
 
 ### `sdk.windows`
 
@@ -831,6 +952,28 @@ Lists all known permissions and their current grant status.
 | `'network'`         | Make network requests          | Future   |
 | `'camera'`          | Access camera                  | Future   |
 | `'microphone'`      | Access microphone              | Future   |
+| `'collaboration'`   | Join rooms, share cursors, sync presence | `sdk.collaboration.*` |
+
+---
+
+### `sdk.collaboration`
+
+Provides access to real-time collaboration features. Requires the `'collaboration'` permission.
+
+| Method          | Signature                                                        | Description                              |
+|-----------------|------------------------------------------------------------------|------------------------------------------|
+| `join`          | `(roomId: string, user: { displayName: string }) => Promise<void>` | Join a collaboration room              |
+| `leave`         | `() => void`                                                     | Leave the current room                   |
+| `getUsers`      | `() => UserPresence[]`                                           | Get online users in the room             |
+| `setStatus`     | `(status: 'active' \| 'idle' \| 'away') => void`                | Set local presence status                |
+| `shareWindow`   | `(windowId: string) => void`                                     | Start sharing a window                   |
+| `unshareWindow` | `(windowId: string) => void`                                     | Stop sharing a window                    |
+| `followUser`    | `(userId: string) => void`                                       | Follow another user's navigation         |
+| `unfollowUser`  | `() => void`                                                     | Stop following a user                    |
+
+**Events:**
+
+The collaboration service emits events through the collaboration store. Use `useCollaboration()` hook in React components to reactively subscribe.
 
 ---
 

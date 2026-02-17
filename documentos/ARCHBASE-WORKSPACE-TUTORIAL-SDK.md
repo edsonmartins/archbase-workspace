@@ -595,18 +595,18 @@ function CollaborationPanel() {
       <h4>Room: {roomId}</h4>
       <p>You are: {currentUser?.displayName}</p>
 
-      <h5>Online Users ({users.size})</h5>
+      <h5>Online Users ({users.length})</h5>
       <ul>
-        {Array.from(users.values()).map((presence) => (
-          <li key={presence.user.userId} style={{ color: presence.user.color }}>
+        {users.map((presence) => (
+          <li key={presence.user.id} style={{ color: presence.user.color }}>
             {presence.user.displayName} ({presence.status})
           </li>
         ))}
       </ul>
 
-      <h5>Shared Windows ({sharedWindows.size})</h5>
+      <h5>Shared Windows ({sharedWindows.length})</h5>
       <ul>
-        {Array.from(sharedWindows.values()).map((win) => (
+        {sharedWindows.map((win) => (
           <li key={win.windowId}>
             {win.windowId} - shared by {win.sharedBy}
           </li>
@@ -628,9 +628,9 @@ function CollaborationPanel() {
 | `isConnected` | `boolean` | Whether a collaboration session is active |
 | `roomId` | `string \| null` | Current room ID |
 | `currentUser` | `CollaborationUser \| null` | Local user info |
-| `users` | `Map<string, UserPresence>` | Online users |
-| `cursors` | `Map<string, RemoteCursor>` | Remote cursor positions |
-| `sharedWindows` | `Map<string, SharedWindowInfo>` | Windows being shared |
+| `users` | `UserPresence[]` | Online users |
+| `cursors` | `RemoteCursor[]` | Remote cursor positions |
+| `sharedWindows` | `SharedWindowInfo[]` | Windows being shared |
 | `followingUserId` | `string \| null` | User being followed |
 
 **When to use:** Building collaborative features, presence indicators, shared editing, or follow-mode UI.

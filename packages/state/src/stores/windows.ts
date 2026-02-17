@@ -59,18 +59,37 @@ type WindowsStore = WindowsStoreState & WindowsStoreActions;
 function recalcZIndexes(windows: Map<string, WorkspaceWindow>, focusStack: string[]): Map<string, WorkspaceWindow> {
   const updated = new Map(windows);
   const focusSet = new Set(focusStack);
-  focusStack.forEach((wid, index) => {
-    const w = updated.get(wid);
-    if (w) {
-      updated.set(wid, { ...w, zIndex: index });
-    }
+
+  // Partition into normal and alwaysOnTop
+  const normalIds = focusStack.filter(id => {
+    const w = updated.get(id);
+    return w && !w.flags.alwaysOnTop;
   });
-  // Ensure windows not in focusStack get z-index 0
+  const pinnedIds = focusStack.filter(id => {
+    const w = updated.get(id);
+    return w && w.flags.alwaysOnTop;
+  });
+
+  // Normal: z-index 0..N-1
+  normalIds.forEach((wid, index) => {
+    const w = updated.get(wid);
+    if (w) updated.set(wid, { ...w, zIndex: index });
+  });
+
+  // AlwaysOnTop: z-index N..N+M-1
+  const baseZ = normalIds.length;
+  pinnedIds.forEach((wid, index) => {
+    const w = updated.get(wid);
+    if (w) updated.set(wid, { ...w, zIndex: baseZ + index });
+  });
+
+  // Windows not in focusStack get z-index 0
   updated.forEach((w, wid) => {
     if (!focusSet.has(wid)) {
       updated.set(wid, { ...w, zIndex: 0 });
     }
   });
+
   return updated;
 }
 
@@ -113,6 +132,7 @@ export const useWindowsStore = create<WindowsStore>()(
             maximizable: options.maximizable ?? true,
             minimizable: options.minimizable ?? true,
             closable: options.closable ?? true,
+            alwaysOnTop: options.alwaysOnTop ?? false,
           },
           props: options.props ?? {},
           metadata: {

@@ -17,18 +17,21 @@ export interface NotifyOptions {
 
 interface NotificationsStoreState {
   notifications: Map<string, WorkspaceNotification>;
+  history: WorkspaceNotification[];
 }
 
 interface NotificationsStoreActions {
   notify: (opts: NotifyOptions) => string;
   dismiss: (id: string) => void;
   dismissAll: () => void;
+  clearHistory: () => void;
 }
 
 type NotificationsStore = NotificationsStoreState & NotificationsStoreActions;
 
 const DEFAULT_DURATION = 5000;
 const MAX_NOTIFICATIONS = 100;
+export const MAX_HISTORY = 100;
 
 // ============================================================
 // Store
@@ -38,6 +41,7 @@ export const useNotificationsStore = create<NotificationsStore>()(
   devtools(
     subscribeWithSelector((set, get) => ({
       notifications: new Map(),
+      history: [],
 
       notify: (opts) => {
         const id = crypto.randomUUID();
@@ -71,18 +75,42 @@ export const useNotificationsStore = create<NotificationsStore>()(
       },
 
       dismiss: (id) => {
-        const { notifications } = get();
-        if (!notifications.has(id)) return;
+        const { notifications, history } = get();
+        const notification = notifications.get(id);
+        if (!notification) return;
+
+        const dismissed: WorkspaceNotification = {
+          ...notification,
+          dismissedAt: Date.now(),
+        };
 
         set((state) => {
-          const notifications = new Map(state.notifications);
-          notifications.delete(id);
-          return { notifications };
+          const next = new Map(state.notifications);
+          next.delete(id);
+          const nextHistory = [dismissed, ...state.history].slice(0, MAX_HISTORY);
+          return { notifications: next, history: nextHistory };
         });
       },
 
       dismissAll: () => {
-        set({ notifications: new Map() });
+        const { notifications, history } = get();
+        if (notifications.size === 0) {
+          set({ notifications: new Map() });
+          return;
+        }
+
+        const now = Date.now();
+        const dismissed = Array.from(notifications.values()).map((n) => ({
+          ...n,
+          dismissedAt: now,
+        }));
+
+        const nextHistory = [...dismissed, ...history].slice(0, MAX_HISTORY);
+        set({ notifications: new Map(), history: nextHistory });
+      },
+
+      clearHistory: () => {
+        set({ history: [] });
       },
     })),
     { name: 'NotificationsStore' },
@@ -104,3 +132,6 @@ export const useNotifications = () =>
     }
     return cachedNotificationsArray;
   });
+
+export const useNotificationHistory = () =>
+  useNotificationsStore((state) => state.history);

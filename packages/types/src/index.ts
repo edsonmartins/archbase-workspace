@@ -6,6 +6,8 @@ export * from './snap';
 export * from './sdk';
 export * from './collaboration';
 export * from './marketplace';
+export * from './wasm';
+import type { WasmConfig } from './wasm'; // needed for local use in AppManifest
 
 // ============================================================
 // Window Types (RFC-001: Window Service API)
@@ -47,6 +49,7 @@ export interface WindowFlags {
   maximizable: boolean;
   minimizable: boolean;
   closable: boolean;
+  alwaysOnTop: boolean;
 }
 
 export interface WindowMetadata {
@@ -94,6 +97,7 @@ export interface WindowOptions {
   props?: Record<string, unknown>;
   icon?: string;
   className?: string;
+  alwaysOnTop?: boolean;
 }
 
 export interface WindowService {
@@ -298,6 +302,10 @@ export interface AppManifest {
   dependencies?: Record<string, string>;
   platform?: PlatformConfig;
   source?: ManifestSource;
+  /** Runtime type hint: 'mf' (Module Federation), 'wasm', or 'iframe'. Inferred if not set. */
+  runtime?: 'mf' | 'wasm' | 'iframe';
+  /** WebAssembly app configuration. When set, the app is rendered as a WASM module. */
+  wasm?: WasmConfig;
 }
 
 // ============================================================

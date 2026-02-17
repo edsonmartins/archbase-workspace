@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAppRegistryStore, useRegistryStatus, activationService, useMarketplaceStore } from '@archbase/workspace-state';
+import { useAppRegistryStore, useRegistryStatus, useWindowsStore, activationService, setPreloadHandler, setAutoStartHandler, useMarketplaceStore } from '@archbase/workspace-state';
 import { KNOWN_MANIFESTS } from '../knownManifests';
 import { registerAllMFRemotes } from '../services/remoteLoader';
 import { injectGlobalSDK } from '../services/sdkGlobal';
@@ -41,7 +41,27 @@ export function useRegistryInit(): void {
       // Inject global SDK factory for non-React apps
       injectGlobalSDK();
 
-      // Initialize activation service (fires onDesktopReady)
+      // Wire lifecycle handlers before init so they fire during onDesktopReady
+      setPreloadHandler((manifest) => {
+        if (manifest.entrypoint) {
+          import('@module-federation/enhanced/runtime').then(({ loadRemote }) => {
+            loadRemote(manifest.entrypoint!).catch(() => {});
+          }).catch(() => {});
+        }
+      });
+
+      setAutoStartHandler((manifest) => {
+        useWindowsStore.getState().openWindow({
+          appId: manifest.id,
+          title: manifest.displayName || manifest.name,
+          width: manifest.window?.defaultWidth,
+          height: manifest.window?.defaultHeight,
+          icon: manifest.icon,
+          alwaysOnTop: manifest.window?.alwaysOnTop,
+        });
+      });
+
+      // Initialize activation service (fires onDesktopReady + autoStart)
       activationService.init();
 
       setStatus('ready');

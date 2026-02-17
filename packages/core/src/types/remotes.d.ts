@@ -17,3 +17,8 @@ declare module 'marketplace/App' {
   const Component: React.ComponentType<Record<string, unknown>>;
   export default Component;
 }
+
+declare module 'draw_wasm/App' {
+  const Component: React.ComponentType<Record<string, unknown>>;
+  export default Component;
+}

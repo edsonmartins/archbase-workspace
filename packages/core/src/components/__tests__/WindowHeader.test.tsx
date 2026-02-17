@@ -57,7 +57,7 @@ function createMockWindow(overrides: Record<string, unknown> = {}) {
     position: { x: 0, y: 0 },
     size: { width: 400, height: 300 },
     zIndex: 1,
-    flags: { resizable: true, minimizable: true, maximizable: true, closable: true },
+    flags: { resizable: true, minimizable: true, maximizable: true, closable: true, alwaysOnTop: false },
     metadata: { icon: null },
     ...overrides,
   };

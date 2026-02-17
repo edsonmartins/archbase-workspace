@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { AppManifest } from '@archbase/workspace-types';
-import { activationService } from '../activationService';
+import { activationService, setPreloadHandler, setAutoStartHandler } from '../activationService';
 import { useAppRegistryStore } from '../../stores/registry';
 import { useCommandRegistryStore } from '../../stores/commands';
 import { useMenuRegistryStore } from '../../stores/menus';
@@ -220,6 +220,123 @@ describe('ActivationService', () => {
       activationService.init();
       activationService.fireEvent('onDesktopReady');
       expect(activationService.isActivated('app.plain')).toBe(false);
+    });
+  });
+
+  describe('lifecycle handlers', () => {
+    it('setPreloadHandler is called when preload=true app is activated', () => {
+      const handler = vi.fn();
+      setPreloadHandler(handler);
+
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.preload',
+          activationEvents: ['onDesktopReady'],
+          lifecycle: { preload: true },
+        }),
+      );
+
+      activationService.init();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'app.preload', lifecycle: { preload: true } }),
+      );
+    });
+
+    it('setAutoStartHandler is called after init for autoStart=true apps', () => {
+      const handler = vi.fn();
+      setAutoStartHandler(handler);
+
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.autostart',
+          activationEvents: ['onDesktopReady'],
+          lifecycle: { autoStart: true },
+        }),
+      );
+
+      activationService.init();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'app.autostart', lifecycle: { autoStart: true } }),
+      );
+    });
+
+    it('apps without lifecycle config do not trigger handlers', () => {
+      const preloadFn = vi.fn();
+      const autoStartFn = vi.fn();
+      setPreloadHandler(preloadFn);
+      setAutoStartHandler(autoStartFn);
+
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.nolc',
+          activationEvents: ['onDesktopReady'],
+        }),
+      );
+
+      activationService.init();
+
+      expect(preloadFn).not.toHaveBeenCalled();
+      expect(autoStartFn).not.toHaveBeenCalled();
+    });
+
+    it('handlers not called if not set (null)', () => {
+      // Do NOT set handlers — they should be null after dispose()
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.lc',
+          activationEvents: ['onDesktopReady'],
+          lifecycle: { preload: true, autoStart: true },
+        }),
+      );
+
+      // Should not throw even though handlers are null
+      expect(() => activationService.init()).not.toThrow();
+      expect(activationService.isActivated('app.lc')).toBe(true);
+    });
+
+    it('activateApp is idempotent — handlers fire only once', () => {
+      const preloadFn = vi.fn();
+      setPreloadHandler(preloadFn);
+
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.once',
+          activationEvents: ['onDesktopReady', 'onCommand:once.open'],
+          lifecycle: { preload: true },
+        }),
+      );
+
+      activationService.init(); // activates via onDesktopReady — preloadFn fires
+      activationService.fireEvent('onCommand:once.open'); // already activated — should not fire again
+
+      expect(preloadFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('dispose resets handlers for re-init', () => {
+      const handler = vi.fn();
+      setPreloadHandler(handler);
+
+      registerManifestDirectly(
+        makeManifest({
+          id: 'app.reset',
+          activationEvents: ['onDesktopReady'],
+          lifecycle: { preload: true },
+        }),
+      );
+
+      activationService.init();
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      // dispose resets handlers to null
+      activationService.dispose();
+
+      // Re-init without re-setting handler — should not call the old handler
+      activationService.init();
+      expect(handler).toHaveBeenCalledTimes(1); // still 1, not 2
     });
   });
 });

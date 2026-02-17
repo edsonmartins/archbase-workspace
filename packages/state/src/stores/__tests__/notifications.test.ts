@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useNotificationsStore } from '../notifications';
+import { useNotificationsStore, MAX_HISTORY } from '../notifications';
 
 function getState() {
   return useNotificationsStore.getState();
@@ -7,7 +7,7 @@ function getState() {
 
 describe('Notifications Store', () => {
   beforeEach(() => {
-    useNotificationsStore.setState({ notifications: new Map() });
+    useNotificationsStore.setState({ notifications: new Map(), history: [] });
   });
 
   describe('notify', () => {
@@ -94,6 +94,80 @@ describe('Notifications Store', () => {
     it('is no-op when already empty', () => {
       getState().dismissAll();
       expect(getState().notifications.size).toBe(0);
+    });
+  });
+
+  describe('history', () => {
+    it('starts with empty history', () => {
+      expect(getState().history).toEqual([]);
+    });
+
+    it('dismiss moves notification to history', () => {
+      const id = getState().notify({ type: 'info', title: 'Test' });
+      getState().dismiss(id);
+      expect(getState().notifications.size).toBe(0);
+      expect(getState().history.length).toBe(1);
+      expect(getState().history[0].title).toBe('Test');
+    });
+
+    it('dismiss sets dismissedAt timestamp', () => {
+      const id = getState().notify({ type: 'info', title: 'Test' });
+      const before = Date.now();
+      getState().dismiss(id);
+      const after = Date.now();
+      const entry = getState().history[0];
+      expect(entry.dismissedAt).toBeGreaterThanOrEqual(before);
+      expect(entry.dismissedAt).toBeLessThanOrEqual(after);
+    });
+
+    it('dismissAll moves all notifications to history', () => {
+      getState().notify({ type: 'info', title: 'A' });
+      getState().notify({ type: 'success', title: 'B' });
+      getState().notify({ type: 'error', title: 'C' });
+      getState().dismissAll();
+      expect(getState().notifications.size).toBe(0);
+      expect(getState().history.length).toBe(3);
+    });
+
+    it('dismissAll sets dismissedAt on all entries', () => {
+      getState().notify({ type: 'info', title: 'A' });
+      getState().notify({ type: 'info', title: 'B' });
+      getState().dismissAll();
+      for (const entry of getState().history) {
+        expect(entry.dismissedAt).toBeDefined();
+        expect(typeof entry.dismissedAt).toBe('number');
+      }
+    });
+
+    it('history is limited to MAX_HISTORY', () => {
+      for (let i = 0; i < MAX_HISTORY + 10; i++) {
+        const id = getState().notify({ type: 'info', title: `N${i}` });
+        getState().dismiss(id);
+      }
+      expect(getState().history.length).toBe(MAX_HISTORY);
+    });
+
+    it('clearHistory empties the history array', () => {
+      const id = getState().notify({ type: 'info', title: 'Test' });
+      getState().dismiss(id);
+      expect(getState().history.length).toBe(1);
+      getState().clearHistory();
+      expect(getState().history.length).toBe(0);
+    });
+
+    it('multiple dismiss calls accumulate in history', () => {
+      const id1 = getState().notify({ type: 'info', title: 'A' });
+      const id2 = getState().notify({ type: 'success', title: 'B' });
+      getState().dismiss(id1);
+      getState().dismiss(id2);
+      expect(getState().history.length).toBe(2);
+      expect(getState().history[0].title).toBe('B');
+      expect(getState().history[1].title).toBe('A');
+    });
+
+    it('dismissAll on empty notifications does not add to history', () => {
+      getState().dismissAll();
+      expect(getState().history.length).toBe(0);
     });
   });
 

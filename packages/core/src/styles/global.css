@@ -891,6 +891,203 @@ html, body, #root {
   line-height: 1;
 }
 
+/* ============================================================
+   Notification Center
+   ============================================================ */
+
+.notification-center-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10004;
+}
+
+.notification-center {
+  position: fixed;
+  right: 12px;
+  bottom: calc(var(--taskbar-height) + 8px);
+  width: 360px;
+  max-height: 480px;
+  background: var(--toast-bg);
+  border: 1px solid var(--toast-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notification-center-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--toast-border);
+}
+
+.notification-center-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--toast-color);
+}
+
+.notification-center-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-center-clear-btn {
+  background: none;
+  border: none;
+  color: var(--toast-info-accent);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.notification-center-clear-btn:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.notification-center-close-btn {
+  background: none;
+  border: none;
+  color: var(--toast-message-color);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  line-height: 1;
+}
+
+.notification-center-close-btn:hover {
+  color: var(--toast-color);
+}
+
+.notification-center-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.notification-center-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--toast-message-color);
+  font-size: 13px;
+}
+
+.notification-center-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.notification-center-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.notification-center-item-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+  margin-top: 1px;
+}
+
+.notification-center-item-info .notification-center-item-icon {
+  background: var(--toast-info-accent);
+}
+
+.notification-center-item-success .notification-center-item-icon {
+  background: var(--toast-success-accent);
+}
+
+.notification-center-item-warning .notification-center-item-icon {
+  background: var(--toast-warning-accent);
+}
+
+.notification-center-item-error .notification-center-item-icon {
+  background: var(--toast-error-accent);
+}
+
+.notification-center-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-center-item-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--toast-color);
+}
+
+.notification-center-item-message {
+  font-size: 12px;
+  color: var(--toast-message-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-center-item-time {
+  font-size: 11px;
+  color: var(--toast-message-color);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Notification bell button */
+.notification-bell-btn {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--taskbar-text);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.notification-bell-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.notification-bell-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--toast-error-accent);
+}
+
+@media (max-width: 400px) {
+  .notification-center {
+    width: calc(100vw - 24px);
+    right: 12px;
+    left: 12px;
+  }
+}
+
 /* ── Global Focus Outline ────────────────────── */
 
 *:focus-visible {

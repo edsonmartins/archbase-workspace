@@ -11,7 +11,7 @@ interface ShortcutsStoreState {
 }
 
 interface ShortcutsStoreActions {
-  register: (shortcut: Shortcut) => void;
+  register: (shortcut: Shortcut) => boolean;
   unregister: (id: string) => void;
   enable: (id: string) => void;
   disable: (id: string) => void;
@@ -53,6 +53,12 @@ export const useShortcutsStore = create<ShortcutsStore>()(
       shortcuts: new Map(),
 
       register: (shortcut) => {
+        const conflict = get().hasConflict(shortcut.combo, shortcut.id);
+        if (conflict) {
+          console.warn(
+            `[ShortcutsStore] Combo conflict for "${shortcut.id}". Overwriting.`
+          );
+        }
         set((state) => {
           const shortcuts = new Map(state.shortcuts);
           shortcuts.set(shortcut.id, shortcut);
@@ -65,6 +71,7 @@ export const useShortcutsStore = create<ShortcutsStore>()(
           }
           return { shortcuts };
         });
+        return conflict;
       },
 
       unregister: (id) => {

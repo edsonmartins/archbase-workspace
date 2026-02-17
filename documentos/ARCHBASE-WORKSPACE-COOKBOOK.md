@@ -1007,7 +1007,7 @@ function CollaborationStatus() {
     <div style={{ fontSize: 12 }}>
       <p>Room: {roomId}</p>
       <p>You: {currentUser?.displayName}</p>
-      <p>Online: {users.size}</p>
+      <p>Online: {users.length}</p>
     </div>
   );
 }
@@ -1023,11 +1023,11 @@ function OnlineUsers() {
 
   return (
     <div>
-      <h4>Online ({users.size})</h4>
+      <h4>Online ({users.length})</h4>
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {Array.from(users.values()).map((presence) => (
+        {users.map((presence) => (
           <li
-            key={presence.user.userId}
+            key={presence.user.id}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1073,24 +1073,24 @@ function CursorDisplay() {
 
   return (
     <>
-      {Array.from(cursors.values()).map((cursor) => (
+      {cursors.map((cursor) => (
         <div
-          key={cursor.userId}
+          key={cursor.user.id}
           style={{
             position: 'absolute',
-            left: cursor.position.x,
-            top: cursor.position.y,
+            left: cursor.cursor.x,
+            top: cursor.cursor.y,
             pointerEvents: 'none',
             zIndex: 99999,
           }}
         >
           {/* Cursor arrow SVG */}
           <svg width="16" height="16" viewBox="0 0 16 16">
-            <path d="M0 0L12 10L6 10L0 16Z" fill={cursor.color} />
+            <path d="M0 0L12 10L6 10L0 16Z" fill={cursor.user.color} />
           </svg>
           <span
             style={{
-              background: cursor.color,
+              background: cursor.user.color,
               color: '#fff',
               fontSize: 10,
               padding: '1px 4px',
@@ -1099,7 +1099,7 @@ function CursorDisplay() {
               whiteSpace: 'nowrap',
             }}
           >
-            {cursor.displayName}
+            {cursor.user.displayName}
           </span>
         </div>
       ))}
@@ -1116,13 +1116,13 @@ import { useCollaboration } from '@archbase/workspace-sdk';
 function SharedWindowsList() {
   const { sharedWindows, isConnected } = useCollaboration();
 
-  if (!isConnected || sharedWindows.size === 0) return null;
+  if (!isConnected || sharedWindows.length === 0) return null;
 
   return (
     <div>
       <h4>Shared Windows</h4>
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {Array.from(sharedWindows.values()).map((win) => (
+        {sharedWindows.map((win) => (
           <li key={win.windowId} style={{ padding: '4px 0' }}>
             <span>{win.windowId}</span>
             <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontSize: 11 }}>
@@ -1165,10 +1165,10 @@ function FollowControl() {
       ) : (
         <div>
           <p>Click a user to follow:</p>
-          {Array.from(users.values()).map((presence) => (
+          {users.map((presence) => (
             <button
-              key={presence.user.userId}
-              onClick={() => followUser(presence.user.userId)}
+              key={presence.user.id}
+              onClick={() => followUser(presence.user.id)}
               style={{ display: 'block', marginBottom: 4 }}
             >
               Follow {presence.user.displayName}

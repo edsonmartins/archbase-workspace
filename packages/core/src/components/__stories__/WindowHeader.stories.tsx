@@ -63,6 +63,7 @@ function WindowHeaderSetup({
         maximizable: true,
         minimizable: true,
         closable: true,
+        alwaysOnTop: false,
       },
       props: {},
       metadata: {

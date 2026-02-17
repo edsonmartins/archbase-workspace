@@ -17,6 +17,7 @@ const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
 const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
+const MF_DRAW_WASM_URL = process.env.MF_DRAW_WASM_URL || 'http://localhost:3009';
 
 export const KNOWN_MANIFESTS: AppManifest[] = [
   {
@@ -325,6 +326,53 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
           title: 'Open Marketplace',
           category: 'Marketplace',
           icon: '🏪',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.draw-wasm',
+    name: 'draw_wasm',
+    version: '0.1.0',
+    entrypoint: '',
+    remoteEntry: '',
+    displayName: 'Draw (WASM)',
+    description: 'WebAssembly-powered drawing canvas',
+    icon: '🎨',
+    runtime: 'wasm' as const,
+    wasm: {
+      wasmUrl: `${MF_DRAW_WASM_URL}/draw.wasm`,
+      jsGlueUrl: `${MF_DRAW_WASM_URL}/draw-adapter.js`,
+      moduleType: 'standalone' as const,
+      renderMode: 'canvas-2d' as const,
+      memory: { initialPages: 256, maxPages: 4096 },
+      streamingCompilation: true,
+    },
+    window: {
+      defaultWidth: 800,
+      defaultHeight: 600,
+      minWidth: 400,
+      minHeight: 300,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: ['notifications', 'storage'],
+    contributes: {
+      commands: [
+        {
+          id: 'draw-wasm.clear',
+          title: 'Clear Canvas',
+          category: 'Draw',
+          icon: '🧹',
+        },
+        {
+          id: 'draw-wasm.save',
+          title: 'Save as PNG',
+          category: 'Draw',
+          icon: '💾',
         },
       ],
     },

@@ -276,4 +276,96 @@ describe('useGlobalKeyboardListener', () => {
 
     expect(mockMinimizeAll).toHaveBeenCalledTimes(1);
   });
+
+  it('only fires shortcuts with scope=global from global keydown', () => {
+    const globalAction = vi.fn();
+    mockShortcutsHolder.shortcuts = [
+      {
+        id: 'workspace.openLauncher',
+        combo: { key: 'k', ctrl: true },
+        label: 'Open App Launcher',
+        scope: 'global',
+        enabled: true,
+      },
+    ];
+
+    mockMatchesKeyCombo.mockReturnValue(true);
+
+    const { onToggleLauncher } = renderHook();
+
+    act(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'k',
+          ctrlKey: true,
+          bubbles: true,
+        }),
+      );
+    });
+
+    expect(onToggleLauncher).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT fire shortcuts with scope=window from the global listener', () => {
+    mockShortcutsHolder.shortcuts = [
+      {
+        id: 'app.custom',
+        combo: { key: 'k', ctrl: true },
+        label: 'Window-scoped Shortcut',
+        scope: 'window',
+        enabled: true,
+      },
+    ];
+
+    mockMatchesKeyCombo.mockReturnValue(true);
+
+    const { onToggleLauncher } = renderHook();
+
+    act(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'k',
+          ctrlKey: true,
+          bubbles: true,
+        }),
+      );
+    });
+
+    // The window-scoped shortcut should be skipped entirely
+    expect(onToggleLauncher).not.toHaveBeenCalled();
+  });
+
+  it('does NOT fire shortcuts with scope=app from the global listener', () => {
+    mockShortcutsHolder.shortcuts = [
+      {
+        id: 'app.scoped',
+        combo: { key: 'a', ctrl: true },
+        label: 'App-scoped Shortcut',
+        scope: 'app',
+        enabled: true,
+      },
+    ];
+
+    mockMatchesKeyCombo.mockReturnValue(true);
+
+    renderHook();
+
+    act(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'a',
+          ctrlKey: true,
+          bubbles: true,
+        }),
+      );
+    });
+
+    // No action should have been called
+    expect(mockCloseWindow).not.toHaveBeenCalled();
+    expect(mockMinimizeAll).not.toHaveBeenCalled();
+    expect(mockFocusNext).not.toHaveBeenCalled();
+    expect(mockFocusPrevious).not.toHaveBeenCalled();
+    expect(mockTileWindows).not.toHaveBeenCalled();
+    expect(mockCascadeWindows).not.toHaveBeenCalled();
+  });
 });

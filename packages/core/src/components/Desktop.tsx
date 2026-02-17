@@ -15,6 +15,7 @@ import { PermissionPrompt } from './PermissionPrompt';
 import { CursorOverlay } from './CursorOverlay';
 import { PresencePanel } from './PresencePanel';
 import { AriaLiveRegion } from './AriaLiveRegion';
+import { NotificationCenter } from './NotificationCenter';
 
 export function Desktop() {
   useRegistryInit();
@@ -29,6 +30,7 @@ export function Desktop() {
   const [launcherVisible, setLauncherVisible] = useState(false);
   const [commandPaletteVisible, setCommandPaletteVisible] = useState(false);
   const [presencePanelVisible, setPresencePanelVisible] = useState(false);
+  const [notificationCenterVisible, setNotificationCenterVisible] = useState(false);
   const [snapZone, setSnapZone] = useState<SnapZone | null>(null);
 
   const openContextMenu = useContextMenuStore((s) => s.open);
@@ -110,6 +112,15 @@ export function Desktop() {
 
   const handleOpenApp = useCallback(
     (app: AppManifest) => {
+      // Singleton enforcement: if the app is singleton, focus the existing window instead
+      if (app.lifecycle?.singleton) {
+        const existing = useWindowsStore.getState().getWindowsByAppId(app.id);
+        if (existing.length > 0) {
+          useWindowsStore.getState().focusWindow(existing[0].id);
+          return;
+        }
+      }
+
       openWindow({
         appId: app.id,
         title: app.displayName || app.name,
@@ -123,6 +134,7 @@ export function Desktop() {
         maximizable: app.window?.maximizable,
         minimizable: app.window?.minimizable,
         closable: app.window?.closable,
+        alwaysOnTop: app.window?.alwaysOnTop,
         icon: app.icon,
       });
     },
@@ -221,7 +233,12 @@ export function Desktop() {
         <CursorOverlay />
         <ContextMenuOverlay />
       </div>
-      <Taskbar apps={apps} onOpenApp={handleOpenApp} onOpenLauncher={toggleLauncher} />
+      <Taskbar
+        apps={apps}
+        onOpenApp={handleOpenApp}
+        onOpenLauncher={toggleLauncher}
+        onToggleNotificationCenter={() => setNotificationCenterVisible((v) => !v)}
+      />
       <AppLauncher
         visible={launcherVisible}
         apps={apps}
@@ -231,6 +248,10 @@ export function Desktop() {
       <ToastContainer />
       <CommandPalette visible={commandPaletteVisible} onClose={closeCommandPalette} />
       <PermissionPrompt />
+      <NotificationCenter
+        visible={notificationCenterVisible}
+        onClose={() => setNotificationCenterVisible(false)}
+      />
       <PresencePanel
         visible={presencePanelVisible}
         onClose={() => setPresencePanelVisible(false)}

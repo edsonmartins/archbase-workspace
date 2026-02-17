@@ -9,7 +9,7 @@ A multi-app workspace that unifies web systems from different frameworks (React,
 - **UI**: React 19
 - **State**: Zustand 5 (global) + Jotai (per-app)
 - **Types**: TypeScript 5.7+ strict mode
-- **Tests**: Vitest (714+ tests) + Playwright (E2E)
+- **Tests**: Vitest (996+ tests) + Playwright (E2E)
 - **Styling**: CSS custom properties with theme system (no CSS-in-JS, no Tailwind)
 
 ## Project Structure
@@ -31,6 +31,8 @@ apps/
   settings/       - Workspace settings manager (port 3005)
   terminal/       - In-browser terminal emulator (port 3006)
   ai-assistant/   - AI chat assistant UI (port 3007)
+  marketplace/    - Plugin marketplace UI (port 3008)
+  draw-wasm/      - WebAssembly drawing canvas demo (port 3009)
 e2e/              - Playwright end-to-end tests
 documentos/       - ADRs, RFCs, concept docs, roadmap
 ```
@@ -69,7 +71,8 @@ documentos/       - ADRs, RFCs, concept docs, roadmap
 - File naming: camelCase for services/hooks, PascalCase for React components
 - Commit messages: Conventional Commits (feat:, fix:, docs:, etc.)
 - Window types use `WorkspaceWindow` (not `Window` to avoid collision with DOM)
-- Remote apps loaded dynamically via `loadRemote()` from MF enhanced runtime
+- Three app rendering modes: Module Federation (`RemoteApp`), iframe sandbox (`SandboxedApp`), WebAssembly (`WasmApp`) — dispatched by `manifest.runtime` / `manifest.wasm` / `manifest.sandbox`
+- Remote MF apps loaded dynamically via `loadRemote()` from MF enhanced runtime
 - Package namespace: `@archbase/workspace-*` for core packages
 - CSS uses `experiments: { css: true }` in Rspack config (native CSS modules)
 - Stores accessed imperatively in services via `useXxxStore.getState()`
@@ -97,3 +100,16 @@ documentos/       - ADRs, RFCs, concept docs, roadmap
 - Identity: Local-only (`CollaborationUser { id, displayName, color }`), no auth required
 - Cursor palette: 8 colors (`CURSOR_PALETTE`), assigned on room entry
 - Encoding: Binary TLV (`encodeMessage`/`decodeMessage`) for efficient WebSocket messages
+
+## WebAssembly Apps
+- Loader: `packages/core/src/services/wasmLoader.ts` — fetch, compile (streaming + fallback), cache, instantiate
+- Component: `packages/core/src/components/WasmApp.tsx` — canvas/DOM rendering, input forwarding, resize observer, animation loop
+- Types: `packages/types/src/wasm.ts` — `WasmConfig`, `WasmAppApi`, `WasmRuntime`, input event types
+- Manifest fields: `AppManifest.wasm?: WasmConfig` and `AppManifest.runtime?: 'mf' | 'wasm' | 'iframe'`
+- Render modes: `canvas-2d`, `canvas-webgl`, `dom`, `hybrid` (canvas + DOM)
+- Module types: `emscripten`, `wasm-pack`, `standalone`
+- SDK injection: `api.setSDK(sdk)` — same JS context, no postMessage needed
+- Module cache: LRU bounded (max 50 compiled modules), runtime cache keyed by windowId
+- Fetch timeout: 30s via AbortController
+- Asset pre-fetch: `Promise.allSettled` (best-effort, non-blocking)
+- CSS isolation: supports `ShadowContainer` when `manifest.isolation.css === 'shadow'`

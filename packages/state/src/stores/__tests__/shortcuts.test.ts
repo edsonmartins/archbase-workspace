@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useShortcutsStore } from '../shortcuts';
 import type { Shortcut, KeyCombo } from '@archbase/workspace-types';
 
@@ -143,6 +143,52 @@ describe('Shortcuts Store', () => {
 
     it('hasConflict returns false for unique combo', () => {
       expect(getState().hasConflict({ key: 'z', alt: true })).toBe(false);
+    });
+  });
+
+  describe('conflict detection', () => {
+    it('registering a conflicting combo returns true and logs console.warn', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      getState().register(makeShortcut({ id: 'first', combo: { key: 'k', meta: true } }));
+      const conflict = getState().register(
+        makeShortcut({ id: 'second', combo: { key: 'k', meta: true } }),
+      );
+      expect(conflict).toBe(true);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Combo conflict for "second"'),
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('registering a non-conflicting combo returns false', () => {
+      getState().register(makeShortcut({ id: 'first', combo: { key: 'k', meta: true } }));
+      const conflict = getState().register(
+        makeShortcut({ id: 'second', combo: { key: 'j', meta: true } }),
+      );
+      expect(conflict).toBe(false);
+    });
+
+    it('registering same id (overwrite) does not count as conflict', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      getState().register(makeShortcut({ id: 'same', combo: { key: 'k', meta: true } }));
+      const conflict = getState().register(
+        makeShortcut({ id: 'same', combo: { key: 'k', meta: true }, label: 'Updated' }),
+      );
+      expect(conflict).toBe(false);
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('hasConflict respects excludeId parameter', () => {
+      getState().register(makeShortcut({ id: 'a', combo: { key: 'k', meta: true } }));
+      getState().register(makeShortcut({ id: 'b', combo: { key: 'j', meta: true } }));
+
+      // Conflict exists when excludeId does not match
+      expect(getState().hasConflict({ key: 'k', meta: true })).toBe(true);
+      // No conflict when the matching shortcut is excluded
+      expect(getState().hasConflict({ key: 'k', meta: true }, 'a')).toBe(false);
+      // Still conflicts if a different id is excluded
+      expect(getState().hasConflict({ key: 'k', meta: true }, 'b')).toBe(true);
     });
   });
 });

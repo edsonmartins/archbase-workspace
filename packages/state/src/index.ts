@@ -34,6 +34,8 @@ export {
 export {
   useNotificationsStore,
   useNotifications,
+  useNotificationHistory,
+  MAX_HISTORY,
 } from './stores/notifications';
 
 export type { NotifyOptions } from './stores/notifications';
@@ -109,4 +111,8 @@ export { idbStateStorage } from './middleware/idbStorage';
 
 export { processContributions, removeContributions } from './services/contributionProcessor';
 
-export { activationService } from './services/activationService';
+export { activationService, setPreloadHandler, setAutoStartHandler } from './services/activationService';
+
+export { isPlatformCompatible, detectOS, detectBrowser } from './utils/platformCompat';
+export { evaluateWhen } from './utils/whenEvaluator';
+export type { WhenContext } from './utils/whenEvaluator';

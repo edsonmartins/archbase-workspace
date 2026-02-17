@@ -8,9 +8,10 @@ interface TaskbarProps {
   apps: AppManifest[];
   onOpenApp: (app: AppManifest) => void;
   onOpenLauncher: () => void;
+  onToggleNotificationCenter?: () => void;
 }
 
-export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
+export function Taskbar({ apps, onOpenApp, onOpenLauncher, onToggleNotificationCenter }: TaskbarProps) {
   const windows = useAllWindows();
   const focusedId = useFocusedWindowId();
   const focusWindow = useWindowsStore((s) => s.focusWindow);
@@ -150,6 +151,16 @@ export function Taskbar({ apps, onOpenApp, onOpenLauncher }: TaskbarProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto', paddingRight: 8 }}>
         <OfflineIndicator />
         <StatusBarWidgets />
+        {onToggleNotificationCenter && (
+          <button
+            className="notification-bell-btn"
+            onClick={onToggleNotificationCenter}
+            aria-label="Toggle Notification Center"
+            title="Notifications"
+          >
+            {'\uD83D\uDD14'}
+          </button>
+        )}
       </div>
     </nav>
   );

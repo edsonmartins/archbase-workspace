@@ -32,6 +32,11 @@ vi.mock('../SandboxedApp', () => ({
   SandboxedApp: () => React.createElement('div', { 'data-testid': 'sandboxed-app' }, 'Sandboxed'),
 }));
 
+vi.mock('../WasmApp', () => ({
+  WasmApp: (props: { appId: string; windowId: string }) =>
+    React.createElement('div', { 'data-testid': 'wasm-app', 'data-appid': props.appId }),
+}));
+
 // ── Import under test (after mocks) ──────────────────────
 
 import { RemoteApp } from '../RemoteApp';
@@ -126,5 +131,80 @@ describe('RemoteApp', () => {
     expect(windowId).toBe('win-5');
     // Fallback manifest has empty permissions (deny-all)
     expect(manifest.permissions).toEqual([]);
+  });
+
+  // ── WASM integration tests ────────────────────────────────
+
+  it('renders WasmApp when manifest has wasm config', () => {
+    const wasmManifest = {
+      id: 'test.wasm.app',
+      name: 'test_wasm',
+      version: '1.0.0',
+      entrypoint: '',
+      remoteEntry: '',
+      wasm: {
+        wasmUrl: 'http://localhost:3009/app.wasm',
+        moduleType: 'standalone' as const,
+        renderMode: 'canvas-2d' as const,
+      },
+      permissions: [],
+    };
+    mockGetApp.mockReturnValue(wasmManifest);
+
+    renderSync(<RemoteApp appId="test.wasm.app" windowId="win-wasm-1" />);
+
+    const wasmApp = container.querySelector('[data-testid="wasm-app"]');
+    expect(wasmApp).toBeTruthy();
+    expect(wasmApp!.getAttribute('data-appid')).toBe('test.wasm.app');
+    // Should NOT render the normal MF loading path
+    const loading = container.querySelector('.remote-app-loading');
+    expect(loading).toBeNull();
+  });
+
+  it('does NOT render WasmApp for normal MF manifest', () => {
+    const mfManifest = {
+      id: 'test.mf.app',
+      name: 'test_mf',
+      version: '1.0.0',
+      entrypoint: './App',
+      remoteEntry: 'http://localhost:3001/mf-manifest.json',
+      permissions: [],
+    };
+    mockGetApp.mockReturnValue(mfManifest);
+    mockLoadRemote.mockReturnValue(new Promise(() => {}));
+
+    renderSync(<RemoteApp appId="test.mf.app" windowId="win-mf-1" />);
+
+    const wasmApp = container.querySelector('[data-testid="wasm-app"]');
+    expect(wasmApp).toBeNull();
+    // Normal MF path should render (loading state from Suspense)
+    const loading = container.querySelector('.remote-app-loading');
+    expect(loading).toBeTruthy();
+  });
+
+  it('WASM takes priority over sandbox when both are set', () => {
+    const bothManifest = {
+      id: 'test.both.app',
+      name: 'test_both',
+      version: '1.0.0',
+      entrypoint: '',
+      remoteEntry: '',
+      wasm: {
+        wasmUrl: 'http://localhost:3009/app.wasm',
+        moduleType: 'standalone' as const,
+        renderMode: 'canvas-2d' as const,
+      },
+      sandbox: true,
+      permissions: [],
+    };
+    mockGetApp.mockReturnValue(bothManifest);
+
+    renderSync(<RemoteApp appId="test.both.app" windowId="win-both-1" />);
+
+    // WASM takes priority: WasmApp is rendered, not SandboxedApp
+    const wasmApp = container.querySelector('[data-testid="wasm-app"]');
+    const sandboxedApp = container.querySelector('[data-testid="sandboxed-app"]');
+    expect(wasmApp).toBeTruthy();
+    expect(sandboxedApp).toBeNull();
   });
 });

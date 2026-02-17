@@ -28,6 +28,7 @@ const permissionSchema = z.enum([
   'network',
   'camera',
   'microphone',
+  'collaboration',
 ]);
 
 const commandSchema = z.object({
@@ -147,6 +148,28 @@ const sandboxConfigSchema = z.union([
 
 const sourceSchema = z.enum(['local', 'remote', 'registry']);
 
+// ── WebAssembly config schemas ──
+
+const wasmMemoryConfigSchema = z.object({
+  initialPages: z.number().int().positive().optional(),
+  maxPages: z.number().int().positive().optional(),
+  shared: z.boolean().optional(),
+});
+
+const wasmConfigSchema = z.object({
+  wasmUrl: z.string().min(1),
+  jsGlueUrl: z.string().min(1).optional(),
+  moduleType: z.enum(['emscripten', 'wasm-pack', 'standalone']),
+  renderMode: z.enum(['canvas-2d', 'canvas-webgl', 'dom', 'hybrid']),
+  memory: wasmMemoryConfigSchema.optional(),
+  env: z.record(z.string(), z.string()).optional(),
+  initFunction: z.string().optional(),
+  assets: z.array(z.string()).optional(),
+  streamingCompilation: z.boolean().optional(),
+});
+
+const runtimeSchema = z.enum(['mf', 'wasm', 'iframe']);
+
 export const appManifestSchema = z.object({
   // Required fields
   id: z.string().min(1).regex(/^[a-z0-9.-]+$/, {
@@ -156,12 +179,12 @@ export const appManifestSchema = z.object({
   version: z.string().regex(/^\d+\.\d+\.\d+$/, {
     message: 'version must follow semver format (e.g., "1.0.0")',
   }),
-  entrypoint: z.string().min(1),
-  remoteEntry: z.string().min(1),
+  entrypoint: z.string(),
+  remoteEntry: z.string(),
 
   // Optional metadata
   displayName: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().max(500).optional(),
   author: authorSchema.optional(),
   license: z.string().optional(),
   homepage: z.string().url().optional(),
@@ -183,6 +206,44 @@ export const appManifestSchema = z.object({
   dependencies: z.record(z.string(), z.string()).optional(),
   platform: platformConfigSchema.optional(),
   source: sourceSchema.optional(),
+
+  // WebAssembly support
+  runtime: runtimeSchema.optional(),
+  wasm: wasmConfigSchema.optional(),
+}).superRefine((data, ctx) => {
+  // For non-WASM apps, entrypoint and remoteEntry must be non-empty
+  if (!data.wasm) {
+    if (!data.entrypoint) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['entrypoint'],
+        message: 'entrypoint is required for non-WASM apps',
+      });
+    }
+    if (!data.remoteEntry) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['remoteEntry'],
+        message: 'remoteEntry is required for non-WASM apps',
+      });
+    }
+  }
+  // runtime='wasm' requires wasm config
+  if (data.runtime === 'wasm' && !data.wasm) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['wasm'],
+      message: "runtime 'wasm' requires 'wasm' configuration",
+    });
+  }
+  // runtime='iframe' requires sandbox config
+  if (data.runtime === 'iframe' && !data.sandbox) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['sandbox'],
+      message: "runtime 'iframe' requires 'sandbox' configuration",
+    });
+  }
 });
 
 export type ValidatedManifest = z.infer<typeof appManifestSchema>;

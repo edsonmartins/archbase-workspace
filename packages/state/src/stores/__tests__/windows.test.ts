@@ -1139,6 +1139,109 @@ describe('WindowsStore', () => {
   });
 
   // ============================================================
+  // alwaysOnTop z-index pinning
+  // ============================================================
+
+  describe('alwaysOnTop', () => {
+    it('openWindow with alwaysOnTop: true sets the flag correctly', () => {
+      const id = getState().openWindow({
+        appId: 'pinned-app',
+        title: 'Pinned',
+        alwaysOnTop: true,
+      });
+
+      const window = getState().windows.get(id);
+      expect(window).toBeDefined();
+      expect(window!.flags.alwaysOnTop).toBe(true);
+    });
+
+    it('openWindow without alwaysOnTop defaults to false', () => {
+      const id = getState().openWindow({
+        appId: 'normal-app',
+        title: 'Normal',
+      });
+
+      const window = getState().windows.get(id);
+      expect(window).toBeDefined();
+      expect(window!.flags.alwaysOnTop).toBe(false);
+    });
+
+    it('alwaysOnTop windows get higher z-index than normal windows', () => {
+      // Open a pinned window first, then a normal window
+      const pinnedId = getState().openWindow({
+        appId: 'pinned-app',
+        title: 'Pinned',
+        alwaysOnTop: true,
+      });
+      const normalId = getState().openWindow({
+        appId: 'normal-app',
+        title: 'Normal',
+      });
+
+      const pinned = getState().windows.get(pinnedId)!;
+      const normal = getState().windows.get(normalId)!;
+
+      // Even though normal was opened later (and is last in focusStack),
+      // pinned should still have a higher z-index
+      expect(pinned.zIndex).toBeGreaterThan(normal.zIndex);
+    });
+
+    it('multiple alwaysOnTop windows maintain focus order among themselves', () => {
+      const pinned1 = getState().openWindow({
+        appId: 'pinned-1',
+        title: 'Pinned 1',
+        alwaysOnTop: true,
+      });
+      const pinned2 = getState().openWindow({
+        appId: 'pinned-2',
+        title: 'Pinned 2',
+        alwaysOnTop: true,
+      });
+
+      // pinned2 was opened last, so it should have a higher z-index
+      const w1 = getState().windows.get(pinned1)!;
+      const w2 = getState().windows.get(pinned2)!;
+      expect(w2.zIndex).toBeGreaterThan(w1.zIndex);
+
+      // Focus pinned1 → it should now have the higher z-index among pinned
+      getState().focusWindow(pinned1);
+      const w1After = getState().windows.get(pinned1)!;
+      const w2After = getState().windows.get(pinned2)!;
+      expect(w1After.zIndex).toBeGreaterThan(w2After.zIndex);
+    });
+
+    it('focusing a normal window does not move it above alwaysOnTop windows', () => {
+      const normalId1 = getState().openWindow({
+        appId: 'normal-1',
+        title: 'Normal 1',
+      });
+      const pinnedId = getState().openWindow({
+        appId: 'pinned-app',
+        title: 'Pinned',
+        alwaysOnTop: true,
+      });
+      const normalId2 = getState().openWindow({
+        appId: 'normal-2',
+        title: 'Normal 2',
+      });
+
+      // Focus the first normal window (move it to top of stack)
+      getState().focusWindow(normalId1);
+
+      const normal1 = getState().windows.get(normalId1)!;
+      const normal2 = getState().windows.get(normalId2)!;
+      const pinned = getState().windows.get(pinnedId)!;
+
+      // normal1 should have the highest z-index among normal windows
+      expect(normal1.zIndex).toBeGreaterThan(normal2.zIndex);
+
+      // But pinned should still be above all normal windows
+      expect(pinned.zIndex).toBeGreaterThan(normal1.zIndex);
+      expect(pinned.zIndex).toBeGreaterThan(normal2.zIndex);
+    });
+  });
+
+  // ============================================================
   // Stress Test
   // ============================================================
 

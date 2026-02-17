@@ -3,6 +3,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import type { AppManifest, ManifestSource, Unsubscribe } from '@archbase/workspace-types';
 import { validateManifestSafe } from '../schemas/manifest';
 import { processContributions, removeContributions } from '../services/contributionProcessor';
+import { isPlatformCompatible } from '../utils/platformCompat';
 
 // ============================================================
 // Constants
@@ -106,6 +107,19 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
         // Cast is safe: Zod validates activationEvents format at runtime,
         // but z.string().refine() infers as string rather than template literal types.
         const manifest = { ...result.data, source: source ?? result.data.source } as AppManifest;
+
+        // Platform compatibility warning
+        if (!isPlatformCompatible(manifest.platform)) {
+          console.warn(`[AppRegistry] "${manifest.id}" may not be compatible with current platform.`);
+        }
+        // Dependency check warning
+        if (manifest.dependencies) {
+          for (const depId of Object.keys(manifest.dependencies)) {
+            if (!get().apps.has(depId)) {
+              console.warn(`[AppRegistry] "${manifest.id}" depends on "${depId}" which is not registered.`);
+            }
+          }
+        }
 
         set((state) => {
           const apps = new Map(state.apps);
