@@ -470,16 +470,17 @@ function Counter() {
 Returns current theme information and a setter for changing the theme.
 
 ```tsx
-const { theme, setTheme, isDark } = useTheme();
+const { theme, setTheme, isDark, resolvedTheme } = useTheme();
 ```
 
-| Property   | Type                                    | Description                              |
-|------------|-----------------------------------------|------------------------------------------|
-| `theme`    | `'dark' \| 'light' \| 'auto'`          | Current theme mode                       |
-| `setTheme` | `(theme: 'dark' \| 'light' \| 'auto') => void` | Change theme                    |
-| `isDark`   | `boolean`                               | Whether current effective theme is dark  |
+| Property        | Type                                    | Description                                                |
+|-----------------|-----------------------------------------|------------------------------------------------------------|
+| `theme`         | `'dark' \| 'light' \| 'auto'`          | Current theme mode setting                                 |
+| `setTheme`      | `(theme: 'dark' \| 'light' \| 'auto') => void` | Change the workspace theme                        |
+| `isDark`        | `boolean`                               | Whether the current effective theme is dark                |
+| `resolvedTheme` | `'dark' \| 'light'`                    | Effective theme after resolving `'auto'` (backward compat) |
 
-**Reactive behavior:** Re-renders the component when the theme changes. When `theme` is `'auto'`, the `isDark` property reflects the operating system's `prefers-color-scheme` media query.
+**Reactive behavior:** Re-renders the component when the theme changes. When `theme` is `'auto'`, both `isDark` and `resolvedTheme` reflect the operating system's `prefers-color-scheme` media query.
 
 **Example:**
 
@@ -976,11 +977,11 @@ Provides access to real-time collaboration features. Requires the `'collaboratio
 
 | Method          | Signature                                                        | Description                              |
 |-----------------|------------------------------------------------------------------|------------------------------------------|
-| `join`          | `(roomId: string, user: { displayName: string }) => Promise<void>` | Join a collaboration room              |
+| `join`          | `(roomId: string) => Promise<void>`                                 | Join a collaboration room              |
 | `leave`         | `() => void`                                                     | Leave the current room                   |
 | `getUsers`      | `() => UserPresence[]`                                           | Get online users in the room             |
 | `setStatus`     | `(status: 'active' \| 'idle' \| 'away') => void`                | Set local presence status                |
-| `shareWindow`   | `(windowId: string) => void`                                     | Start sharing a window                   |
+| `shareWindow`   | `(windowId: string, mode?: 'view' \| 'edit') => void`            | Start sharing a window                   |
 | `unshareWindow` | `(windowId: string) => void`                                     | Stop sharing a window                    |
 | `followUser`    | `(userId: string) => void`                                       | Follow another user's navigation         |
 | `unfollowUser`  | `() => void`                                                     | Stop following a user                    |
@@ -1234,7 +1235,8 @@ type Permission =
   | 'filesystem.write'
   | 'network'
   | 'camera'
-  | 'microphone';
+  | 'microphone'
+  | 'collaboration';
 
 type PermissionGrant = 'granted' | 'denied' | 'prompt';
 ```
@@ -1258,8 +1260,11 @@ interface ContextMenuItem {
   id: string;
   label: string;
   icon?: string;
+  shortcut?: string;
   disabled?: boolean;
-  action: () => void;
+  separator?: boolean;
+  action?: () => void;
+  children?: ContextMenuItem[];
 }
 ```
 

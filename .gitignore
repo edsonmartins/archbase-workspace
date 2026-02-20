@@ -6,6 +6,12 @@ dist/
 build/
 .mf/
 
+# TypeScript compiled artifacts that may land in src/ (IDE or bare tsc runs)
+packages/types/src/**/*.js
+packages/types/src/**/*.js.map
+packages/types/src/**/*.d.ts
+packages/types/src/**/*.d.ts.map
+
 # Turborepo
 .turbo/
 

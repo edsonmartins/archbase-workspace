@@ -10,6 +10,9 @@ const FETCH_TIMEOUT_MS = 30_000;
 /** Compiled WebAssembly.Module cache (keyed by wasmUrl, LRU bounded) */
 const moduleCache = new Map<string, WebAssembly.Module>();
 
+/** In-flight compilations keyed by wasmUrl — deduplicates concurrent requests */
+const inFlightCompilations = new Map<string, Promise<WebAssembly.Module>>();
+
 /** Active runtime cache (keyed by windowId) */
 const runtimeCache = new Map<string, WasmRuntime>();
 
@@ -113,32 +116,47 @@ export function clearWasmModuleCache(): void {
 // ── Internal helpers ──
 
 async function compileWasm(config: WasmConfig): Promise<WebAssembly.Module> {
+  // 1. Return cached compiled module if available
   const cached = moduleCache.get(config.wasmUrl);
   if (cached) return cached;
 
-  let module: WebAssembly.Module;
+  // 2. Deduplicate concurrent compilations: return the in-flight promise if one exists
+  const inFlight = inFlightCompilations.get(config.wasmUrl);
+  if (inFlight) return inFlight;
 
-  if (
-    config.streamingCompilation !== false &&
-    typeof WebAssembly.compileStreaming === 'function'
-  ) {
-    try {
-      // Use a single fetch, reuse the response for fallback
-      const response = fetchWithTimeout(config.wasmUrl);
-      module = await WebAssembly.compileStreaming(response);
-    } catch {
-      // Fallback: Content-Type may not be application/wasm — re-fetch as arrayBuffer
+  // 3. Start compilation and register in-flight promise
+  const compilationPromise = (async (): Promise<WebAssembly.Module> => {
+    let module: WebAssembly.Module;
+
+    if (
+      config.streamingCompilation !== false &&
+      typeof WebAssembly.compileStreaming === 'function'
+    ) {
+      try {
+        // Use a single fetch, reuse the response for fallback
+        const response = fetchWithTimeout(config.wasmUrl);
+        module = await WebAssembly.compileStreaming(response);
+      } catch {
+        // Fallback: Content-Type may not be application/wasm — re-fetch as arrayBuffer
+        const buffer = await (await fetchWithTimeout(config.wasmUrl)).arrayBuffer();
+        module = await WebAssembly.compile(buffer);
+      }
+    } else {
       const buffer = await (await fetchWithTimeout(config.wasmUrl)).arrayBuffer();
       module = await WebAssembly.compile(buffer);
     }
-  } else {
-    const buffer = await (await fetchWithTimeout(config.wasmUrl)).arrayBuffer();
-    module = await WebAssembly.compile(buffer);
-  }
 
-  evictIfNeeded(moduleCache, MODULE_CACHE_MAX);
-  moduleCache.set(config.wasmUrl, module);
-  return module;
+    evictIfNeeded(moduleCache, MODULE_CACHE_MAX);
+    moduleCache.set(config.wasmUrl, module);
+    return module;
+  })();
+
+  inFlightCompilations.set(config.wasmUrl, compilationPromise);
+  try {
+    return await compilationPromise;
+  } finally {
+    inFlightCompilations.delete(config.wasmUrl);
+  }
 }
 
 function createMemory(config: WasmConfig): WebAssembly.Memory {

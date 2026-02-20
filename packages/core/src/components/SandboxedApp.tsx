@@ -43,6 +43,13 @@ export function SandboxedApp({ appId, windowId, manifest }: SandboxedAppProps) {
   const origin = sandboxConfig?.origin ?? '*';
   const iframeSrc = sandboxConfig?.url;
 
+  if (origin === '*') {
+    console.warn(
+      `[SandboxedApp] "${manifest.id}" has no sandbox.origin configured — defaulting to "*". ` +
+      'This is insecure in production. Set manifest.sandbox.origin to the actual host origin.',
+    );
+  }
+
   // Bridge setup: must be called unconditionally (Rules of Hooks).
   // Guards inside the effect body handle the case where iframeSrc is missing.
   useEffect(() => {

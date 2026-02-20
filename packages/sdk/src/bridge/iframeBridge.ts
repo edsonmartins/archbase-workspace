@@ -38,7 +38,14 @@ export interface IframeBridgeSDK extends Omit<WorkspaceSDK, 'windows'> {
 }
 
 export interface IframeBridgeOptions {
-  /** Target origin for postMessage. Defaults to '*' (dev only — set to host origin in production). */
+  /**
+   * Target origin for postMessage. Should be set to the host origin in production
+   * (e.g. `"https://your-app.com"`). Defaults to `'*'` for local development only.
+   *
+   * **Security warning**: Using `'*'` in production allows any origin to receive
+   * SDK messages, which is a potential XSS vector. Always set this explicitly
+   * in production deployments.
+   */
   targetOrigin?: string;
 }
 
@@ -50,6 +57,13 @@ export interface IframeBridgeOptions {
  */
 export function createIframeBridgeSDK(appId: string, windowId: string, options?: IframeBridgeOptions): IframeBridgeSDK {
   const targetOrigin = options?.targetOrigin ?? '*';
+
+  if (targetOrigin === '*') {
+    console.warn(
+      '[IframeBridgeSDK] postMessage targetOrigin is "*" — this is insecure in production. ' +
+      'Set IframeBridgeOptions.targetOrigin to the host origin (e.g. "https://your-app.com").',
+    );
+  }
   const pendingRequests = new Map<string, {
     resolve: (value: unknown) => void;
     reject: (error: Error) => void;

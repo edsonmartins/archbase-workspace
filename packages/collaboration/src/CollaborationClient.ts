@@ -79,6 +79,7 @@ export class CollaborationClient {
   private windowSyncCallbacks: import('./services/WindowSyncService').WindowSyncCallbacks;
 
   private cleanupFns: (() => void)[] = [];
+  private joining = false;
 
   constructor(options: CollaborationClientOptions = {}) {
     this.transport = options.transport ?? new WebSocketTransport();
@@ -115,51 +116,61 @@ export class CollaborationClient {
   // ── Lifecycle ──
 
   async join(roomId: string): Promise<void> {
-    if (this.joined) {
-      this.leave();
+    // Guard against concurrent join() calls before the first resolves
+    if (this.joining) return;
+    this.joining = true;
+
+    try {
+      if (this.joined) {
+        this.leave();
+      }
+      // Defense in depth: ensure cleanupFns is empty before registering new listeners
+      this.cleanupFns = [];
+
+      this.roomId = roomId;
+      await this.transport.connect(this.serverUrl, roomId, this.currentUser.id);
+      this.joined = true;
+      this.joinedAt = Date.now();
+
+      // Wire transport messages to Yjs doc
+      this.bindTransportToYjs();
+
+      // Start sub-services
+      this.cursorService.start();
+      this.presenceService.start();
+      this.windowSync.start();
+
+      // Listen for sub-service events
+      const unsubCursor = this.cursorService.onRemoteCursor((cursor) => {
+        this.onStateChange?.({ type: 'cursor-update', cursor });
+      });
+
+      const unsubJoined = this.presenceService.onUserJoined((user) => {
+        this.onStateChange?.({ type: 'user-joined', user });
+      });
+
+      const unsubLeft = this.presenceService.onUserLeft((userId) => {
+        this.onStateChange?.({ type: 'user-left', userId });
+      });
+
+      const unsubShared = this.windowSync.onWindowShared((info) => {
+        this.onStateChange?.({ type: 'window-shared', info });
+      });
+
+      const unsubDisconnect = this.transport.onDisconnect(() => {
+        this.onStateChange?.({ type: 'disconnected' });
+      });
+
+      this.cleanupFns.push(unsubCursor, unsubJoined, unsubLeft, unsubShared, unsubDisconnect);
+
+      this.onStateChange?.({
+        type: 'connected',
+        roomId,
+        user: this.currentUser,
+      });
+    } finally {
+      this.joining = false;
     }
-
-    this.roomId = roomId;
-    await this.transport.connect(this.serverUrl, roomId, this.currentUser.id);
-    this.joined = true;
-    this.joinedAt = Date.now();
-
-    // Wire transport messages to Yjs doc
-    this.bindTransportToYjs();
-
-    // Start sub-services
-    this.cursorService.start();
-    this.presenceService.start();
-    this.windowSync.start();
-
-    // Listen for sub-service events
-    const unsubCursor = this.cursorService.onRemoteCursor((cursor) => {
-      this.onStateChange?.({ type: 'cursor-update', cursor });
-    });
-
-    const unsubJoined = this.presenceService.onUserJoined((user) => {
-      this.onStateChange?.({ type: 'user-joined', user });
-    });
-
-    const unsubLeft = this.presenceService.onUserLeft((userId) => {
-      this.onStateChange?.({ type: 'user-left', userId });
-    });
-
-    const unsubShared = this.windowSync.onWindowShared((info) => {
-      this.onStateChange?.({ type: 'window-shared', info });
-    });
-
-    const unsubDisconnect = this.transport.onDisconnect(() => {
-      this.onStateChange?.({ type: 'disconnected' });
-    });
-
-    this.cleanupFns.push(unsubCursor, unsubJoined, unsubLeft, unsubShared, unsubDisconnect);
-
-    this.onStateChange?.({
-      type: 'connected',
-      roomId,
-      user: this.currentUser,
-    });
   }
 
   leave(): void {
