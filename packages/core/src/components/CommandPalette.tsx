@@ -17,7 +17,8 @@ export function CommandPalette({ visible, onClose }: CommandPaletteProps) {
 
   useFocusTrap(overlayRef, visible);
 
-  const commands = useCommandRegistryStore((s) => s.getAllCommands());
+  const commandsMap = useCommandRegistryStore((s) => s.commands);
+  const commands = useMemo(() => Array.from(commandsMap.values()), [commandsMap]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands.filter((c) => c.enabled);
