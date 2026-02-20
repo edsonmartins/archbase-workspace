@@ -57,6 +57,7 @@ export default defineConfig({
         '@archbase/workspace-state': { singleton: true },
         '@archbase/ai-assistant': { singleton: true },
       },
+      dts: process.env.NODE_ENV !== 'production' ? false : { generateTypes: true },
     }),
   ],
   devServer: {

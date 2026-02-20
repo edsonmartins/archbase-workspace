@@ -53,6 +53,7 @@ export default defineConfig({
         '@archbase/workspace-sdk': { singleton: true },
         '@archbase/workspace-state': { singleton: true },
       },
+      dts: process.env.NODE_ENV !== 'production' ? false : { generateTypes: true },
     }),
   ],
   experiments: {
