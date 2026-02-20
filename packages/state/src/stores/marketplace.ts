@@ -14,6 +14,12 @@ import { detectUpdates } from '../services/marketplaceService';
 import { validateManifestSafe } from '../schemas/manifest';
 
 // ============================================================
+// Constants
+// ============================================================
+
+const DISCOVERY_TIMEOUT_MS = 10_000;
+
+// ============================================================
 // Types
 // ============================================================
 
@@ -130,7 +136,7 @@ export const useMarketplaceStore = create<MarketplaceStore>()(
             const results = await Promise.allSettled(
               registryUrls.map(async (url) => {
                 const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 10000);
+                const timeout = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS);
                 try {
                   const resp = await fetch(url, { signal: controller.signal });
                   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);

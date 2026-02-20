@@ -10,6 +10,7 @@ import { isPlatformCompatible } from '../utils/platformCompat';
 // ============================================================
 
 const MAX_ERRORS = 100;
+const DISCOVERY_TIMEOUT_MS = 10_000;
 
 // ============================================================
 // Registry Error
@@ -144,7 +145,7 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
 
       discoverFromUrl: async (url) => {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
+        const timeout = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS);
 
         try {
           const response = await fetch(url, { signal: controller.signal });
@@ -175,7 +176,7 @@ export const useAppRegistryStore = create<RegistryStoreState & RegistryStoreActi
         const results = await Promise.allSettled(
           urls.map(async (url) => {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 10000);
+            const timeout = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT_MS);
 
             try {
               const response = await fetch(url, { signal: controller.signal });

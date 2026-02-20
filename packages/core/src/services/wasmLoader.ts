@@ -7,7 +7,7 @@ const FETCH_TIMEOUT_MS = 30_000;
 
 // ── Cache ──
 
-/** Compiled WebAssembly.Module cache (keyed by wasmUrl, LRU bounded) */
+/** Compiled WebAssembly.Module cache (keyed by wasmUrl, true LRU: hits are promoted to MRU position) */
 const moduleCache = new Map<string, WebAssembly.Module>();
 
 /** In-flight compilations keyed by wasmUrl — deduplicates concurrent requests */
@@ -25,7 +25,20 @@ function fetchWithTimeout(url: string, timeoutMs = FETCH_TIMEOUT_MS): Promise<Re
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
-/** Evict oldest entry if cache exceeds max */
+/**
+ * LRU get: return cached value and promote it to most-recently-used position.
+ * Map preserves insertion order; delete + re-insert moves the entry to the end.
+ */
+function lruGet<K, V>(cache: Map<K, V>, key: K): V | undefined {
+  const value = cache.get(key);
+  if (value !== undefined) {
+    cache.delete(key);
+    cache.set(key, value);
+  }
+  return value;
+}
+
+/** Evict the least-recently-used (first/oldest) entry if cache exceeds max */
 function evictIfNeeded<K, V>(cache: Map<K, V>, max: number): void {
   if (cache.size >= max) {
     const firstKey = cache.keys().next().value;
@@ -116,8 +129,8 @@ export function clearWasmModuleCache(): void {
 // ── Internal helpers ──
 
 async function compileWasm(config: WasmConfig): Promise<WebAssembly.Module> {
-  // 1. Return cached compiled module if available
-  const cached = moduleCache.get(config.wasmUrl);
+  // 1. Return cached compiled module if available (promote to MRU for LRU eviction)
+  const cached = lruGet(moduleCache, config.wasmUrl);
   if (cached) return cached;
 
   // 2. Deduplicate concurrent compilations: return the in-flight promise if one exists
