@@ -12,6 +12,8 @@ const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export default defineConfig({
   entry: './src/index.tsx',
   output: {
@@ -81,6 +83,8 @@ export default defineConfig({
         '@archbase/workspace-sdk': { singleton: true },
         '@archbase/ai-assistant': { singleton: true },
       },
+      // Disable live type-hint WebSocket in dev (avoids noise in console)
+      dts: isDev ? false : { generateTypes: true },
     }),
   ],
   devServer: {
