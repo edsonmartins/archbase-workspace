@@ -67,8 +67,17 @@ export function WasmApp({ appId, windowId, manifest }: WasmAppProps) {
           const loop = (ts: number) => {
             const rt = getWasmRuntime(windowId);
             if (rt?.api.render) {
-              rt.api.render(ts);
-              animFrameRef.current = requestAnimationFrame(loop);
+              try {
+                rt.api.render(ts);
+                animFrameRef.current = requestAnimationFrame(loop);
+              } catch (renderErr) {
+                // Render crash: surface to UI and stop the loop
+                const err = renderErr instanceof Error ? renderErr : new Error(String(renderErr));
+                console.error(`[WasmApp] Render loop crashed for "${displayName}":`, err);
+                setError(err);
+                setStatus('error');
+                // Do NOT schedule another frame — loop terminates here
+              }
             }
           };
           animFrameRef.current = requestAnimationFrame(loop);

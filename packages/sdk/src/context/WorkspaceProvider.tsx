@@ -5,7 +5,7 @@ const WorkspaceContext = createContext<WorkspaceSDK | null>(null);
 
 export interface WorkspaceProviderProps {
   value: WorkspaceSDK;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function WorkspaceProvider({ value, children }: WorkspaceProviderProps) {
