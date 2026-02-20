@@ -1,6 +1,6 @@
 import { defineConfig } from '@rspack/cli';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import { CopyRspackPlugin, HtmlRspackPlugin } from '@rspack/core';
+import { CopyRspackPlugin, DefinePlugin, HtmlRspackPlugin } from '@rspack/core';
 import path from 'path';
 
 const MF_HELLO_WORLD_URL = process.env.MF_HELLO_WORLD_URL || 'http://localhost:3001';
@@ -56,6 +56,17 @@ export default defineConfig({
     ],
   },
   plugins: [
+    new DefinePlugin({
+      'process.env.MF_HELLO_WORLD_URL': JSON.stringify(MF_HELLO_WORLD_URL),
+      'process.env.MF_CALCULATOR_URL': JSON.stringify(MF_CALCULATOR_URL),
+      'process.env.MF_NOTES_URL': JSON.stringify(MF_NOTES_URL),
+      'process.env.MF_FILE_EXPLORER_URL': JSON.stringify(MF_FILE_EXPLORER_URL),
+      'process.env.MF_SETTINGS_URL': JSON.stringify(MF_SETTINGS_URL),
+      'process.env.MF_TERMINAL_URL': JSON.stringify(MF_TERMINAL_URL),
+      'process.env.MF_AI_ASSISTANT_URL': JSON.stringify(MF_AI_ASSISTANT_URL),
+      'process.env.MF_MARKETPLACE_URL': JSON.stringify(MF_MARKETPLACE_URL),
+      'process.env.MF_DRAW_WASM_URL': JSON.stringify(process.env.MF_DRAW_WASM_URL || 'http://localhost:3009'),
+    }),
     new HtmlRspackPlugin({
       template: './src/index.html',
       title: 'Archbase Workspace',
@@ -79,9 +90,9 @@ export default defineConfig({
         react: { singleton: true, requiredVersion: '^19.0.0' },
         'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
         zustand: { singleton: true, requiredVersion: '^5.0.0' },
-        '@archbase/workspace-state': { singleton: true },
-        '@archbase/workspace-sdk': { singleton: true },
-        '@archbase/ai-assistant': { singleton: true },
+        '@archbase/workspace-state': { singleton: true, requiredVersion: false },
+        '@archbase/workspace-sdk': { singleton: true, requiredVersion: false },
+        '@archbase/ai-assistant': { singleton: true, requiredVersion: false },
       },
       // Disable live type-hint WebSocket in dev (avoids noise in console)
       dts: isDev ? false : { generateTypes: true },
