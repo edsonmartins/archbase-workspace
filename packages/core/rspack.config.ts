@@ -1,6 +1,6 @@
 import { defineConfig } from '@rspack/cli';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import { CopyRspackPlugin } from '@rspack/core';
+import { CopyRspackPlugin, HtmlRspackPlugin } from '@rspack/core';
 import path from 'path';
 
 const MF_HELLO_WORLD_URL = process.env.MF_HELLO_WORLD_URL || 'http://localhost:3001';
@@ -54,6 +54,10 @@ export default defineConfig({
     ],
   },
   plugins: [
+    new HtmlRspackPlugin({
+      template: './src/index.html',
+      title: 'Archbase Workspace',
+    }),
     new CopyRspackPlugin({
       patterns: [{ from: 'public', to: '.' }],
     }),
@@ -86,13 +90,5 @@ export default defineConfig({
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
-  },
-  builtins: {
-    html: [
-      {
-        template: './src/index.html',
-        title: 'Archbase Workspace',
-      },
-    ],
   },
 });
