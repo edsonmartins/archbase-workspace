@@ -33,7 +33,7 @@
   --btn-close-bg: #dc2626;
   --btn-minimize-bg: #d97706;
   --btn-maximize-bg: #16a34a;
-  --btn-size: 14px;
+  --btn-size: 16px;
 
   --focus-ring: #3b82f6;
 
@@ -135,12 +135,16 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
-  color: transparent;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.65);
+  transition: color 0.1s ease, filter 0.1s ease;
 }
 
 .window-ctrl-btn:hover {
-  color: var(--ctrl-btn-hover-color);
+  color: rgba(0, 0, 0, 0.9);
+  filter: brightness(1.08);
 }
 
 .window-ctrl-btn:focus-visible {

@@ -130,6 +130,9 @@ export function Window({ windowId, onSnapPreview, animationState }: WindowProps)
           background: 'var(--window-body-bg)',
           overflow: 'auto',
           position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
         }}
       >
         <RemoteApp appId={window.appId} windowId={windowId} />

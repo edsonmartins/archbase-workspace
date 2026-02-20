@@ -1,10 +1,11 @@
 .marketplace-app {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--text-primary, #e0e0e0);
-  background: var(--app-bg, #1a1a2e);
+  background: var(--window-body-bg, #1a1a2e);
   overflow: hidden;
 }
 
