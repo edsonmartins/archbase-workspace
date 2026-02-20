@@ -1,8 +1,4 @@
-import { createRoot } from 'react-dom/client';
-import { App } from './App';
-import { registerServiceWorker } from './swRegistration';
-
-const root = createRoot(document.getElementById('root')!);
-root.render(<App />);
-
-registerServiceWorker();
+// Async boundary — required for Module Federation shared module initialization.
+// MF needs a dynamic import here so it can resolve shared singletons (React,
+// Zustand, SDK) before any synchronous code runs.
+import('./bootstrap');
