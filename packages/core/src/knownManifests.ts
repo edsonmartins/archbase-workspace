@@ -18,6 +18,7 @@ const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
 const MF_DRAW_WASM_URL = process.env.MF_DRAW_WASM_URL || 'http://localhost:3009';
+const MF_TICKET_SYSTEM_URL = process.env.MF_TICKET_SYSTEM_URL || 'http://localhost:3010';
 
 export const KNOWN_MANIFESTS: AppManifest[] = [
   {
@@ -326,6 +327,71 @@ export const KNOWN_MANIFESTS: AppManifest[] = [
           title: 'Open Marketplace',
           category: 'Marketplace',
           icon: '🏪',
+        },
+      ],
+    },
+  },
+  {
+    id: 'dev.archbase.ticket-system',
+    name: 'ticket_system',
+    version: '0.1.0',
+    entrypoint: './src/App.tsx',
+    remoteEntry: `${MF_TICKET_SYSTEM_URL}/mf-manifest.json`,
+    displayName: 'Tickets',
+    description: 'B2B Ticket and Helpdesk Management System',
+    icon: '\uD83C\uDFAB',
+    window: {
+      defaultWidth: 1000,
+      defaultHeight: 650,
+      minWidth: 700,
+      minHeight: 450,
+      resizable: true,
+      maximizable: true,
+      minimizable: true,
+      closable: true,
+    },
+    source: 'local',
+    permissions: ['notifications', 'storage'],
+    activationEvents: ['onCommand:ticket.new'],
+    contributes: {
+      commands: [
+        {
+          id: 'ticket.new',
+          title: 'New Ticket',
+          category: 'Tickets',
+          icon: '\uD83C\uDFAB',
+        },
+        {
+          id: 'ticket.search',
+          title: 'Search Tickets',
+          category: 'Tickets',
+          icon: '\uD83D\uDD0D',
+        },
+      ],
+      settings: [
+        {
+          key: 'ticket.defaultPriority',
+          type: 'string',
+          default: 'medium',
+          description: 'Default priority for new tickets',
+        },
+        {
+          key: 'ticket.defaultCategory',
+          type: 'string',
+          default: 'Support',
+          description: 'Default category for new tickets',
+        },
+        {
+          key: 'ticket.showClosedTickets',
+          type: 'boolean',
+          default: false,
+          description: 'Whether to show closed tickets in the list',
+        },
+        {
+          key: 'ticket.sortBy',
+          type: 'string',
+          default: 'updatedAt',
+          description: 'Default sort field for ticket list',
         },
       ],
     },

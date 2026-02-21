@@ -11,6 +11,7 @@ const MF_SETTINGS_URL = process.env.MF_SETTINGS_URL || 'http://localhost:3005';
 const MF_TERMINAL_URL = process.env.MF_TERMINAL_URL || 'http://localhost:3006';
 const MF_AI_ASSISTANT_URL = process.env.MF_AI_ASSISTANT_URL || 'http://localhost:3007';
 const MF_MARKETPLACE_URL = process.env.MF_MARKETPLACE_URL || 'http://localhost:3008';
+const MF_TICKET_SYSTEM_URL = process.env.MF_TICKET_SYSTEM_URL || 'http://localhost:3010';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -66,6 +67,7 @@ export default defineConfig({
       'process.env.MF_AI_ASSISTANT_URL': JSON.stringify(MF_AI_ASSISTANT_URL),
       'process.env.MF_MARKETPLACE_URL': JSON.stringify(MF_MARKETPLACE_URL),
       'process.env.MF_DRAW_WASM_URL': JSON.stringify(process.env.MF_DRAW_WASM_URL || 'http://localhost:3009'),
+      'process.env.MF_TICKET_SYSTEM_URL': JSON.stringify(MF_TICKET_SYSTEM_URL),
     }),
     new HtmlRspackPlugin({
       template: './src/index.html',
@@ -85,6 +87,7 @@ export default defineConfig({
         terminal: `terminal@${MF_TERMINAL_URL}/mf-manifest.json`,
         ai_assistant: `ai_assistant@${MF_AI_ASSISTANT_URL}/mf-manifest.json`,
         marketplace: `marketplace@${MF_MARKETPLACE_URL}/mf-manifest.json`,
+        ticket_system: `ticket_system@${MF_TICKET_SYSTEM_URL}/mf-manifest.json`,
       },
       shared: {
         react: { singleton: true, requiredVersion: '^19.0.0' },
