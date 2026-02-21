@@ -1,4 +1,4 @@
-import React, { Suspense, Component, type ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, Component, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import { registryQueries } from '@archbase/workspace-state';
 import { createSecureSDK, WorkspaceProvider } from '@archbase/workspace-sdk';
@@ -6,6 +6,7 @@ import type { AppManifest } from '@archbase/workspace-types';
 import { ShadowContainer } from './ShadowContainer';
 import { SandboxedApp } from './SandboxedApp';
 import { WasmApp } from './WasmApp';
+import { loadRemoteCSS } from '../services/remoteCSS';
 
 interface RemoteAppProps {
   appId: string;
@@ -103,6 +104,15 @@ export function RemoteApp({ appId, windowId }: RemoteAppProps) {
     clearRemoteCache(mfName);
     setRetryCount((c) => c + 1);
   }, [mfName]);
+
+  // Load CSS from remote's mf-manifest.json. The MF runtime only loads JS chunks
+  // from remotes — it does NOT inject CSS produced by Rspack experiments.css: true.
+  useEffect(() => {
+    const remoteEntry = manifest?.remoteEntry;
+    if (remoteEntry && remoteEntry.endsWith('/mf-manifest.json')) {
+      loadRemoteCSS(remoteEntry);
+    }
+  }, [manifest?.remoteEntry]);
 
   // WASM mode: WebAssembly rendering path
   if (isWasm && manifest) {

@@ -90,17 +90,17 @@ describe('WebSocketTransport', () => {
   });
 
   it('connects with correct URL containing room and user params', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'my-room', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'my-room', 'user-1');
     // Flush the setTimeout(0) that fires the 'open' event
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
-    expect(capturedWs.url).toBe('ws://localhost:4000?room=my-room&user=user-1');
+    expect(capturedWs.url).toBe('ws://localhost:4100?room=my-room&user=user-1');
     expect(transport.connected).toBe(true);
   });
 
   it('sends JSON messages via ws.send', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -122,7 +122,7 @@ describe('WebSocketTransport', () => {
   });
 
   it('receives and emits parsed messages', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -150,7 +150,7 @@ describe('WebSocketTransport', () => {
   });
 
   it('base64-encodes Uint8Array payloads for sync types', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -177,7 +177,7 @@ describe('WebSocketTransport', () => {
   });
 
   it('decodes base64 string payloads for sync types on receive', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -215,7 +215,7 @@ describe('WebSocketTransport', () => {
   });
 
   it('emits disconnect on ws close', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -229,7 +229,7 @@ describe('WebSocketTransport', () => {
   });
 
   it('disconnect closes the websocket', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 

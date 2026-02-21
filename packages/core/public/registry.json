@@ -13,7 +13,7 @@
         "displayName": "Pomodoro Timer",
         "description": "Focus timer with customizable work/break intervals. Stay productive with the Pomodoro technique.",
         "author": { "name": "Archbase Community" },
-        "icon": "timer",
+        "icon": "⏱️",
         "keywords": ["timer", "focus", "productivity", "pomodoro"],
         "permissions": ["notifications"],
         "source": "registry"
@@ -37,7 +37,7 @@
         "displayName": "Color Picker",
         "description": "Advanced color picker with palettes, gradients, and color space conversions.",
         "author": { "name": "Design Tools" },
-        "icon": "palette",
+        "icon": "🎨",
         "keywords": ["color", "picker", "design", "palette"],
         "permissions": ["clipboard.write"],
         "source": "registry"
@@ -61,7 +61,7 @@
         "displayName": "JSON Viewer",
         "description": "Collapsible tree view for JSON data with search, filtering, and syntax highlighting.",
         "author": { "name": "Dev Utils" },
-        "icon": "code",
+        "icon": "💻",
         "keywords": ["json", "viewer", "developer", "data"],
         "permissions": ["clipboard.read", "storage"],
         "source": "registry"
@@ -85,7 +85,7 @@
         "displayName": "Weather Widget",
         "description": "Real-time weather information with forecasts and location support.",
         "author": { "name": "Widget Labs" },
-        "icon": "cloud",
+        "icon": "☁️",
         "keywords": ["weather", "widget", "forecast"],
         "permissions": ["network"],
         "source": "registry"
@@ -109,7 +109,7 @@
         "displayName": "Snake Game",
         "description": "Classic snake game to take a break. Compete for high scores!",
         "author": { "name": "Fun Apps" },
-        "icon": "gamepad",
+        "icon": "🎮",
         "keywords": ["game", "snake", "fun", "break"],
         "permissions": ["storage"],
         "source": "registry"

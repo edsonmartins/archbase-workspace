@@ -6,6 +6,7 @@ import {
   useMarketplaceStatus,
   filterPlugins,
 } from '@archbase/workspace-state';
+import { useTheme } from '@archbase/workspace-sdk';
 import type { MarketplaceFilter } from '@archbase/workspace-types';
 import { MarketplaceHeader, type MarketplaceTab } from './components/MarketplaceHeader';
 import { PluginCard } from './components/PluginCard';
@@ -20,6 +21,7 @@ export default function MarketplaceApp() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [selectedPluginId, setSelectedPluginId] = useState<string | null>(null);
+  const { isDark } = useTheme();
 
   const registry = useMarketplaceRegistry();
   const categories = useMarketplaceCategories();
@@ -52,7 +54,7 @@ export default function MarketplaceApp() {
     : null;
 
   return (
-    <div className="marketplace-app">
+    <div className="marketplace-app" data-theme={isDark ? 'dark' : 'light'}>
       <MarketplaceHeader
         tab={tab}
         onTabChange={setTab}

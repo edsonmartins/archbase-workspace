@@ -52,7 +52,7 @@ describe('CollaborationClient', () => {
     stateEvents = [];
     client = new CollaborationClient({
       transport,
-      serverUrl: 'ws://localhost:4000',
+      serverUrl: 'ws://localhost:4100',
       user: { id: 'user-1', displayName: 'Test', color: '#3b82f6' },
       onStateChange: (event) => stateEvents.push(event),
     });

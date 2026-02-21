@@ -30,6 +30,22 @@ let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 
+// Theme state
+let bgColor = '#ffffff';
+let bgR = 255;
+let bgG = 255;
+let bgB = 255;
+
+function detectTheme() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  const dark = theme === 'dark';
+  bgColor = dark ? '#1e293b' : '#ffffff';
+  bgR = dark ? 30 : 255;
+  bgG = dark ? 41 : 255;
+  bgB = dark ? 59 : 255;
+  brushColor = dark ? '#e2e8f0' : '#000000';
+}
+
 // ── WASM import functions (called by WASM module) ──
 
 function wasm_canvas_width() {
@@ -100,7 +116,7 @@ function wasm_draw_line(x0, y0, x1, y1, r, g, b, a, width) {
 
 function jsClearCanvas() {
   if (!ctx || !canvasEl) return;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 }
 
@@ -151,6 +167,7 @@ function hexToRGBA(hex) {
  */
 export default async function init(wasmModule, canvas, container, memory, env) {
   canvasEl = canvas;
+  detectTheme();
 
   if (canvasEl) {
     ctx = canvasEl.getContext('2d');
@@ -182,8 +199,13 @@ export default async function init(wasmModule, canvas, container, memory, env) {
 
     // Allocate pixel buffer for WASM rendering path
     pixelBuffer = new Uint8ClampedArray(canvasWidth * canvasHeight * 4);
-    // Fill white
-    pixelBuffer.fill(255);
+    // Fill with theme background
+    for (let i = 0; i < pixelBuffer.length; i += 4) {
+      pixelBuffer[i] = bgR;
+      pixelBuffer[i + 1] = bgG;
+      pixelBuffer[i + 2] = bgB;
+      pixelBuffer[i + 3] = 255;
+    }
     useWasmPixelBuffer = true;
 
     console.log('[draw-wasm] WASM module instantiated successfully');
@@ -230,8 +252,9 @@ export function setSDK(sdk) {
     cmds.register('draw-wasm.clear', {
       title: 'Draw: Clear Canvas',
       handler: () => {
+        detectTheme();
         if (useWasmPixelBuffer && pixelBuffer) {
-          wasm_clear_canvas(255, 255, 255, 255);
+          wasm_clear_canvas(bgR, bgG, bgB, 255);
           flushPixelBuffer();
         } else {
           jsClearCanvas();
@@ -288,8 +311,13 @@ export function resize(w, h) {
     // Reallocate pixel buffer for new dimensions
     const oldBuffer = pixelBuffer;
     pixelBuffer = new Uint8ClampedArray(w * h * 4);
-    // Fill white
-    pixelBuffer.fill(255);
+    // Fill with theme background
+    for (let i = 0; i < pixelBuffer.length; i += 4) {
+      pixelBuffer[i] = bgR;
+      pixelBuffer[i + 1] = bgG;
+      pixelBuffer[i + 2] = bgB;
+      pixelBuffer[i + 3] = 255;
+    }
 
     // Copy what fits from the old buffer
     if (oldBuffer) {
@@ -370,8 +398,9 @@ export function onKeyDown(event) {
   // C key — clear canvas
   if (event.key === 'c' || event.key === 'C') {
     if (!event.ctrlKey && !event.metaKey) {
+      detectTheme();
       if (useWasmPixelBuffer && pixelBuffer) {
-        wasm_clear_canvas(255, 255, 255, 255);
+        wasm_clear_canvas(bgR, bgG, bgB, 255);
         flushPixelBuffer();
       } else {
         jsClearCanvas();

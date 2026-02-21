@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useWorkspace, useCommand, useStorage } from '@archbase/workspace-sdk';
+import { useWorkspace, useCommand, useStorage, useTheme } from '@archbase/workspace-sdk';
 
 interface Note {
   id: string;
@@ -19,6 +19,7 @@ const DEFAULT_NOTES: Note[] = [
 
 export default function Notes() {
   const sdk = useWorkspace();
+  const { isDark } = useTheme();
   const [notes, setNotes] = useStorage<Note[]>('notes', DEFAULT_NOTES);
   const [activeNoteId, setActiveNoteId] = useStorage<string>('activeNoteId', '1');
 
@@ -77,28 +78,42 @@ export default function Notes() {
     }
   });
 
+  const c = isDark
+    ? {
+        sidebarBg: '#1e293b', sidebarBorder: '#334155', sidebarItemBorder: '#1e293b',
+        sidebarTitle: '#e2e8f0', activeBg: '#334155', text: '#e2e8f0', muted: '#64748b',
+        editorBg: '#0f172a', editorBorder: '#334155', editorText: '#e2e8f0',
+        deleteFg: '#f87171', emptyFg: '#64748b',
+      }
+    : {
+        sidebarBg: '#f9fafb', sidebarBorder: '#e5e7eb', sidebarItemBorder: '#f3f4f6',
+        sidebarTitle: '#374151', activeBg: '#e5e7eb', text: '#1f2937', muted: '#9ca3af',
+        editorBg: '#ffffff', editorBorder: '#e5e7eb', editorText: '#1f2937',
+        deleteFg: '#ef4444', emptyFg: '#9ca3af',
+      };
+
   return (
-    <div style={{ display: 'flex', height: '100%', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', height: '100%', fontFamily: 'sans-serif', background: c.editorBg }}>
       {/* Sidebar */}
       <div
         style={{
           width: 180,
-          borderRight: '1px solid #e5e7eb',
+          borderRight: `1px solid ${c.sidebarBorder}`,
           display: 'flex',
           flexDirection: 'column',
-          background: '#f9fafb',
+          background: c.sidebarBg,
         }}
       >
         <div
           style={{
             padding: '8px 12px',
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: `1px solid ${c.sidebarBorder}`,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Notes</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: c.sidebarTitle }}>Notes</span>
           <button
             onClick={handleAddNote}
             style={{
@@ -126,15 +141,15 @@ export default function Notes() {
               style={{
                 padding: '8px 12px',
                 cursor: 'pointer',
-                background: note.id === activeNoteId ? '#e5e7eb' : 'transparent',
-                borderBottom: '1px solid #f3f4f6',
+                background: note.id === activeNoteId ? c.activeBg : 'transparent',
+                borderBottom: `1px solid ${c.sidebarItemBorder}`,
               }}
             >
               <div
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: '#1f2937',
+                  color: c.text,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -142,7 +157,7 @@ export default function Notes() {
               >
                 {note.title}
               </div>
-              <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 2 }}>
+              <div style={{ fontSize: 10, color: c.muted, marginTop: 2 }}>
                 {new Date(note.updatedAt).toLocaleTimeString()}
               </div>
             </div>
@@ -157,13 +172,13 @@ export default function Notes() {
             <div
               style={{
                 padding: '6px 12px',
-                borderBottom: '1px solid #e5e7eb',
+                borderBottom: `1px solid ${c.editorBorder}`,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
-              <span style={{ fontSize: 11, color: '#9ca3af' }}>
+              <span style={{ fontSize: 11, color: c.muted }}>
                 {new Date(activeNote.updatedAt).toLocaleString()}
               </span>
               <button
@@ -171,7 +186,7 @@ export default function Notes() {
                 style={{
                   border: 'none',
                   background: 'transparent',
-                  color: '#ef4444',
+                  color: c.deleteFg,
                   cursor: 'pointer',
                   fontSize: 12,
                   padding: '2px 6px',
@@ -194,7 +209,8 @@ export default function Notes() {
                 fontSize: 14,
                 lineHeight: 1.6,
                 fontFamily: 'sans-serif',
-                color: '#1f2937',
+                color: c.editorText,
+                background: c.editorBg,
               }}
             />
           </>
@@ -205,7 +221,7 @@ export default function Notes() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#9ca3af',
+              color: c.emptyFg,
               fontSize: 14,
             }}
           >

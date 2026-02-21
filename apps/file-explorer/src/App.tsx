@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useWorkspace, useCommand, useStorage } from '@archbase/workspace-sdk';
+import { useWorkspace, useCommand, useStorage, useTheme } from '@archbase/workspace-sdk';
 
 interface FileNode {
   id: string;
@@ -31,9 +31,26 @@ const DEFAULT_FS: FileNode[] = [
 
 export default function FileExplorer() {
   const sdk = useWorkspace();
+  const { isDark } = useTheme();
   const [files, setFiles] = useStorage<FileNode[]>('filesystem', DEFAULT_FS);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const c = isDark
+    ? {
+        bg: '#0f172a', toolbarBg: '#1e293b', toolbarBorder: '#334155',
+        btnBg: '#1e293b', btnBorder: '#475569', btnText: '#e2e8f0',
+        breadcrumbText: '#94a3b8', breadcrumbBorder: '#1e293b',
+        itemText: '#e2e8f0', selectedBg: '#334155', emptyText: '#64748b',
+        deleteBorder: '#ef4444', deleteFg: '#f87171',
+      }
+    : {
+        bg: '#ffffff', toolbarBg: '#f9fafb', toolbarBorder: '#e5e7eb',
+        btnBg: '#fff', btnBorder: '#d1d5db', btnText: '#1f2937',
+        breadcrumbText: '#6b7280', breadcrumbBorder: '#f3f4f6',
+        itemText: '#1f2937', selectedBg: '#e5e7eb', emptyText: '#9ca3af',
+        deleteBorder: '#ef4444', deleteFg: '#ef4444',
+      };
 
   // Navigate into current path
   const getCurrentFolder = useCallback((): FileNode[] => {
@@ -131,24 +148,25 @@ export default function FileExplorer() {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif', background: c.bg }}>
       {/* Toolbar */}
       <div
         style={{
           padding: '6px 12px',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: `1px solid ${c.toolbarBorder}`,
           display: 'flex',
           gap: 8,
           alignItems: 'center',
-          background: '#f9fafb',
+          background: c.toolbarBg,
         }}
       >
         <button
           onClick={handleGoUp}
           disabled={currentPath.length === 0}
           style={{
-            border: '1px solid #d1d5db',
-            background: '#fff',
+            border: `1px solid ${c.btnBorder}`,
+            background: c.btnBg,
+            color: c.btnText,
             borderRadius: 4,
             padding: '4px 8px',
             cursor: currentPath.length === 0 ? 'default' : 'pointer',
@@ -161,8 +179,9 @@ export default function FileExplorer() {
         <button
           onClick={handleNewFile}
           style={{
-            border: '1px solid #d1d5db',
-            background: '#fff',
+            border: `1px solid ${c.btnBorder}`,
+            background: c.btnBg,
+            color: c.btnText,
             borderRadius: 4,
             padding: '4px 8px',
             cursor: 'pointer',
@@ -174,8 +193,9 @@ export default function FileExplorer() {
         <button
           onClick={handleNewFolder}
           style={{
-            border: '1px solid #d1d5db',
-            background: '#fff',
+            border: `1px solid ${c.btnBorder}`,
+            background: c.btnBg,
+            color: c.btnText,
             borderRadius: 4,
             padding: '4px 8px',
             cursor: 'pointer',
@@ -188,9 +208,9 @@ export default function FileExplorer() {
           <button
             onClick={() => handleDelete(selectedId)}
             style={{
-              border: '1px solid #ef4444',
-              background: '#fff',
-              color: '#ef4444',
+              border: `1px solid ${c.deleteBorder}`,
+              background: c.btnBg,
+              color: c.deleteFg,
               borderRadius: 4,
               padding: '4px 8px',
               cursor: 'pointer',
@@ -203,14 +223,14 @@ export default function FileExplorer() {
       </div>
 
       {/* Breadcrumb */}
-      <div style={{ padding: '4px 12px', fontSize: 11, color: '#6b7280', borderBottom: '1px solid #f3f4f6' }}>
+      <div style={{ padding: '4px 12px', fontSize: 11, color: c.breadcrumbText, borderBottom: `1px solid ${c.breadcrumbBorder}` }}>
         {breadcrumbs.join(' / ')}
       </div>
 
       {/* File list */}
       <div style={{ flex: 1, overflow: 'auto', padding: 4 }}>
         {currentItems.length === 0 ? (
-          <div style={{ padding: 20, textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+          <div style={{ padding: 20, textAlign: 'center', color: c.emptyText, fontSize: 13 }}>
             Empty folder
           </div>
         ) : (
@@ -231,9 +251,9 @@ export default function FileExplorer() {
                   padding: '6px 12px',
                   cursor: 'pointer',
                   borderRadius: 4,
-                  background: selectedId === item.id ? '#e5e7eb' : 'transparent',
+                  background: selectedId === item.id ? c.selectedBg : 'transparent',
                   fontSize: 13,
-                  color: '#1f2937',
+                  color: c.itemText,
                 }}
               >
                 <span style={{ fontSize: 16 }}>

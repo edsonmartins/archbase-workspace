@@ -83,7 +83,7 @@ export class CollaborationClient {
 
   constructor(options: CollaborationClientOptions = {}) {
     this.transport = options.transport ?? new WebSocketTransport();
-    this.serverUrl = options.serverUrl ?? 'ws://localhost:4000';
+    this.serverUrl = options.serverUrl ?? 'ws://localhost:4100';
     this.currentUser = resolveUser(options.user);
     this.ydoc = new Y.Doc();
     this.onStateChange = options.onStateChange ?? null;

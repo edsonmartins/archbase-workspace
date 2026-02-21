@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import type { AppManifest, WasmKeyEvent, WasmPointerEvent } from '@archbase/workspace-types';
-import { createSecureSDK } from '@archbase/workspace-sdk';
+import { createSecureSDK, useTheme } from '@archbase/workspace-sdk';
 import {
   loadWasmModule,
   destroyWasmRuntime,
@@ -21,6 +21,7 @@ export function WasmApp({ appId, windowId, manifest }: WasmAppProps) {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<Error | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const { isDark } = useTheme();
 
   if (!manifest.wasm) {
     return null;
@@ -220,7 +221,7 @@ export function WasmApp({ appId, windowId, manifest }: WasmAppProps) {
     <div
       ref={containerRef}
       className="wasm-app-container"
-      style={{ width: '100%', height: '100%', position: 'relative' }}
+      style={{ width: '100%', height: '100%', position: 'relative', background: isDark ? '#1e293b' : '#ffffff' }}
       tabIndex={0}
     >
       {status === 'loading' && (

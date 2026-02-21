@@ -1,5 +1,5 @@
 import { Provider, useAtomValue, useSetAtom } from 'jotai';
-import { useWorkspace, useCommand, useSettingValue } from '@archbase/workspace-sdk';
+import { useWorkspace, useCommand, useSettingValue, useTheme } from '@archbase/workspace-sdk';
 import {
   displayValueAtom,
   operationAtom,
@@ -17,17 +17,21 @@ function CalcButton({
   onClick,
   span = 1,
   variant = 'default',
+  isDark,
 }: {
   label: string;
   onClick: () => void;
   span?: number;
   variant?: 'default' | 'operator' | 'function';
+  isDark: boolean;
 }) {
-  const bgColors = {
-    default: '#374151',
-    operator: '#f59e0b',
-    function: '#4b5563',
-  };
+  const bgColors = isDark
+    ? { default: '#374151', operator: '#f59e0b', function: '#4b5563' }
+    : { default: '#e5e7eb', operator: '#f59e0b', function: '#d1d5db' };
+
+  const textColor = isDark
+    ? '#fff'
+    : variant === 'operator' ? '#fff' : '#1f2937';
 
   return (
     <button
@@ -41,7 +45,7 @@ function CalcButton({
         borderRadius: 8,
         cursor: 'pointer',
         background: bgColors[variant],
-        color: '#fff',
+        color: textColor,
         transition: 'opacity 0.1s',
       }}
       onMouseDown={(e) => { (e.target as HTMLElement).style.opacity = '0.7'; }}
@@ -65,6 +69,7 @@ function CalculatorUI() {
   const percent = useSetAtom(percentAtom);
 
   const sdk = useWorkspace();
+  const { isDark } = useTheme();
   const [precisionRaw] = useSettingValue<number>('calculator.decimalPrecision');
   const precision = precisionRaw ?? 2;
 
@@ -82,13 +87,17 @@ function CalculatorUI() {
     return num.toFixed(precision);
   })();
 
+  const c = isDark
+    ? { bg: '#1f2937', displayText: '#fff', opText: '#9ca3af' }
+    : { bg: '#f9fafb', displayText: '#1f2937', opText: '#6b7280' };
+
   return (
     <div
       style={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: '#1f2937',
+        background: c.bg,
         padding: 12,
         gap: 8,
       }}
@@ -100,7 +109,7 @@ function CalculatorUI() {
           padding: '16px 12px',
           fontSize: 32,
           fontWeight: 300,
-          color: '#fff',
+          color: c.displayText,
           fontFamily: 'monospace',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -117,7 +126,7 @@ function CalculatorUI() {
             textAlign: 'right',
             padding: '0 12px',
             fontSize: 14,
-            color: '#9ca3af',
+            color: c.opText,
           }}
         >
           {operation}
@@ -133,29 +142,29 @@ function CalculatorUI() {
           flex: 1,
         }}
       >
-        <CalcButton label="AC" onClick={() => clearCalc()} variant="function" />
-        <CalcButton label="+/-" onClick={() => toggleSign()} variant="function" />
-        <CalcButton label="%" onClick={() => percent()} variant="function" />
-        <CalcButton label="/" onClick={() => performOperation('/')} variant="operator" />
+        <CalcButton label="AC" onClick={() => clearCalc()} variant="function" isDark={isDark} />
+        <CalcButton label="+/-" onClick={() => toggleSign()} variant="function" isDark={isDark} />
+        <CalcButton label="%" onClick={() => percent()} variant="function" isDark={isDark} />
+        <CalcButton label="/" onClick={() => performOperation('/')} variant="operator" isDark={isDark} />
 
-        <CalcButton label="7" onClick={() => inputDigit('7')} />
-        <CalcButton label="8" onClick={() => inputDigit('8')} />
-        <CalcButton label="9" onClick={() => inputDigit('9')} />
-        <CalcButton label="*" onClick={() => performOperation('*')} variant="operator" />
+        <CalcButton label="7" onClick={() => inputDigit('7')} isDark={isDark} />
+        <CalcButton label="8" onClick={() => inputDigit('8')} isDark={isDark} />
+        <CalcButton label="9" onClick={() => inputDigit('9')} isDark={isDark} />
+        <CalcButton label="*" onClick={() => performOperation('*')} variant="operator" isDark={isDark} />
 
-        <CalcButton label="4" onClick={() => inputDigit('4')} />
-        <CalcButton label="5" onClick={() => inputDigit('5')} />
-        <CalcButton label="6" onClick={() => inputDigit('6')} />
-        <CalcButton label="-" onClick={() => performOperation('-')} variant="operator" />
+        <CalcButton label="4" onClick={() => inputDigit('4')} isDark={isDark} />
+        <CalcButton label="5" onClick={() => inputDigit('5')} isDark={isDark} />
+        <CalcButton label="6" onClick={() => inputDigit('6')} isDark={isDark} />
+        <CalcButton label="-" onClick={() => performOperation('-')} variant="operator" isDark={isDark} />
 
-        <CalcButton label="1" onClick={() => inputDigit('1')} />
-        <CalcButton label="2" onClick={() => inputDigit('2')} />
-        <CalcButton label="3" onClick={() => inputDigit('3')} />
-        <CalcButton label="+" onClick={() => performOperation('+')} variant="operator" />
+        <CalcButton label="1" onClick={() => inputDigit('1')} isDark={isDark} />
+        <CalcButton label="2" onClick={() => inputDigit('2')} isDark={isDark} />
+        <CalcButton label="3" onClick={() => inputDigit('3')} isDark={isDark} />
+        <CalcButton label="+" onClick={() => performOperation('+')} variant="operator" isDark={isDark} />
 
-        <CalcButton label="0" onClick={() => inputDigit('0')} span={2} />
-        <CalcButton label="." onClick={() => inputDecimal()} />
-        <CalcButton label="=" onClick={() => calculate()} variant="operator" />
+        <CalcButton label="0" onClick={() => inputDigit('0')} span={2} isDark={isDark} />
+        <CalcButton label="." onClick={() => inputDecimal()} isDark={isDark} />
+        <CalcButton label="=" onClick={() => calculate()} variant="operator" isDark={isDark} />
       </div>
     </div>
   );

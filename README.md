@@ -8,6 +8,12 @@ A React library for building multi-app workspaces with professional window manag
   <img src="images/infografico_main.png" alt="Archbase Workspace — One Workspace, Every App, Any Framework" width="800" />
 </p>
 
+<p align="center">
+  <img src="images/workspace_example.png" alt="Archbase Workspace — Desktop with multiple apps running" width="800" />
+  <br />
+  <em>Multiple apps running simultaneously: Ticket System, Marketplace, Calculator, Draw (WASM), AI Assistant, and Hello World</em>
+</p>
+
 ---
 
 ## Why Archbase Workspace?
@@ -68,7 +74,7 @@ archbase-workspace/
 │   ├── create-app/     # CLI scaffolding tool (create, dev, build, publish)
 │   ├── ai-assistant/   # AI service library (OpenAI integration, tool calling)
 │   ├── collaboration/  # Real-time collaboration engine (Yjs CRDT, WebSocket/WebRTC)
-│   └── collaboration-server/  # Reference WebSocket server for collaboration (port 4000)
+│   └── collaboration-server/  # Reference WebSocket server for collaboration (port 4100)
 ├── apps/
 │   ├── hello-world/    # Example remote app (port 3001)
 │   ├── calculator/     # Calculator with Jotai state (port 3002)

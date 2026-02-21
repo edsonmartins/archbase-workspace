@@ -22,7 +22,7 @@ packages/
   create-app/     - CLI scaffolding tool (create, dev, build, publish)
   ai-assistant/   - AI service library (OpenAI integration, tool calling)
   collaboration/  - Real-time collaboration engine (Yjs CRDT, WebSocket/WebRTC)
-  collaboration-server/ - Reference WebSocket server for collaboration (port 4000)
+  collaboration-server/ - Reference WebSocket server for collaboration (port 4100)
 apps/
   hello-world/    - Example remote MF (port 3001)
   calculator/     - Calculator with Jotai (port 3002)
@@ -93,7 +93,7 @@ documentos/       - ADRs, RFCs, concept docs, roadmap
 - Engine: `@archbase/collaboration` with Yjs CRDT for state sync
 - Transports: `WebSocketTransport` (default, server-mediated), `WebRTCTransport` (P2P data channels)
 - Client: `CollaborationClient` orchestrates cursor/presence/window sync/follow services
-- Server: `@archbase/collaboration-server` (port 4000), `ws` library + Yjs sync protocol
+- Server: `@archbase/collaboration-server` (port 4100), `ws` library + Yjs sync protocol
 - Store: `useCollaborationStore` (connected, users, cursors, sharedWindows, followingUserId)
 - SDK: `useCollaboration()` hook, `createCollaborationService()` for remote apps
 - UI: `CursorOverlay` (SVG cursors), `PresencePanel` (online users), `CollaborationBadge` (window header)

@@ -120,16 +120,16 @@ describe('WebRTCTransport', () => {
   });
 
   it('connects signaling WebSocket with mode=rtc param', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
-    expect(capturedSignalingWs.url).toBe('ws://localhost:4000?room=room-1&user=user-1&mode=rtc');
+    expect(capturedSignalingWs.url).toBe('ws://localhost:4100?room=room-1&user=user-1&mode=rtc');
     expect(transport.connected).toBe(true);
   });
 
   it('sends data via data channels to all peers', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -168,7 +168,7 @@ describe('WebRTCTransport', () => {
   });
 
   it('disconnect closes all peer connections and signaling ws', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -193,7 +193,7 @@ describe('WebRTCTransport', () => {
   });
 
   it('removes peer on peer-left signal', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -218,7 +218,7 @@ describe('WebRTCTransport', () => {
   });
 
   it('emits disconnect when all peers disconnected', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 
@@ -241,7 +241,7 @@ describe('WebRTCTransport', () => {
   });
 
   it('buffers ICE candidates until remote description is set', async () => {
-    const connectPromise = transport.connect('ws://localhost:4000', 'room-1', 'user-1');
+    const connectPromise = transport.connect('ws://localhost:4100', 'room-1', 'user-1');
     await vi.advanceTimersByTimeAsync(0);
     await connectPromise;
 

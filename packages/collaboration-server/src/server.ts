@@ -2,14 +2,39 @@ import { WebSocketServer, type WebSocket } from 'ws';
 import { RoomManager } from './RoomManager';
 import { SignalingService } from './SignalingService';
 
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = Number(process.env.PORT) || 4100;
 const rooms = new RoomManager();
 const signaling = new SignalingService();
 
-const wss = new WebSocketServer({ port: PORT });
+let wss: WebSocketServer;
 
-console.log(`[Archbase Collaboration Server] Listening on port ${PORT}`);
+function startServer(attempt = 1): void {
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY_MS = 800;
 
+  wss = new WebSocketServer({ port: PORT });
+
+  wss.on('listening', () => {
+    console.log(`[Archbase Collaboration Server] Listening on port ${PORT}`);
+    setupConnections();
+  });
+
+  wss.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE' && attempt <= MAX_RETRIES) {
+      console.warn(
+        `[Archbase Collaboration Server] Port ${PORT} in use (attempt ${attempt}/${MAX_RETRIES}), retrying in ${RETRY_DELAY_MS}ms...`,
+      );
+      setTimeout(() => startServer(attempt + 1), RETRY_DELAY_MS);
+    } else {
+      console.error(`[Archbase Collaboration Server] Fatal error:`, err.message);
+      process.exit(1);
+    }
+  });
+}
+
+startServer();
+
+function setupConnections() {
 wss.on('connection', (ws: WebSocket, req) => {
   const url = new URL(req.url ?? '/', `http://localhost:${PORT}`);
   const roomId = url.searchParams.get('room');
@@ -78,6 +103,7 @@ wss.on('connection', (ws: WebSocket, req) => {
     console.error(`[Room:${roomId}] WebSocket error for ${userId}:`, err.message);
   });
 });
+}
 
 // Graceful shutdown
 function shutdown() {

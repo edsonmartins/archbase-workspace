@@ -14,20 +14,41 @@
   --ticket-status-resolved: #22c55e;
   --ticket-status-closed: #6b7280;
 
-  --ticket-bg: var(--window-body-bg, #0f172a);
-  --ticket-color: var(--text-primary, #e2e8f0);
-  --ticket-color-secondary: var(--text-secondary, #94a3b8);
+  --ticket-accent: var(--btn-primary-bg, #3b82f6);
+}
+
+/* Dark theme (default) */
+.ticket-app[data-theme="dark"] {
+  --ticket-bg: #0f172a;
+  --ticket-color: #e2e8f0;
+  --ticket-color-secondary: #94a3b8;
   --ticket-color-muted: #64748b;
-  --ticket-border: var(--window-border-color, #1e293b);
+  --ticket-border: #1e293b;
   --ticket-hover-bg: rgba(255, 255, 255, 0.04);
   --ticket-selected-bg: rgba(59, 130, 246, 0.12);
   --ticket-input-bg: rgba(0, 0, 0, 0.2);
   --ticket-input-border: #334155;
-  --ticket-accent: var(--btn-primary-bg, #3b82f6);
   --ticket-label-bg: rgba(59, 130, 246, 0.15);
   --ticket-label-color: #93c5fd;
   --ticket-internal-bg: rgba(234, 179, 8, 0.08);
   --ticket-internal-border: rgba(234, 179, 8, 0.3);
+}
+
+/* Light theme */
+.ticket-app[data-theme="light"] {
+  --ticket-bg: #ffffff;
+  --ticket-color: #1e293b;
+  --ticket-color-secondary: #475569;
+  --ticket-color-muted: #94a3b8;
+  --ticket-border: #e2e8f0;
+  --ticket-hover-bg: rgba(0, 0, 0, 0.03);
+  --ticket-selected-bg: rgba(59, 130, 246, 0.08);
+  --ticket-input-bg: #f8fafc;
+  --ticket-input-border: #cbd5e1;
+  --ticket-label-bg: rgba(59, 130, 246, 0.1);
+  --ticket-label-color: #2563eb;
+  --ticket-internal-bg: rgba(234, 179, 8, 0.06);
+  --ticket-internal-border: rgba(234, 179, 8, 0.25);
 }
 
 /* ============================================================
